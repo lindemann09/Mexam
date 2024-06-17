@@ -27,6 +27,12 @@ def command_line_interface():
     parser.add_argument('-s', action='store',
                     dest='tag',
                     help='Select collection')
+
+    parser.add_argument('-u', action='store',
+                    dest='uuid_file',
+                    help='UUID file')
+
+
     parser.add_argument("-e", action='store',
                         dest='exam_file',
                         help="exam file name",
@@ -61,6 +67,18 @@ def command_line_interface():
                         help="show text matrix",
                         default=False)
 
+    # database function
+    parser.add_argument("--unselect", dest="unselect_all",
+                        action="store_true",
+                        help="unselect all questions (to save in DB use '-R')",
+                        default=False)
+
+    parser.add_argument("--info", dest="info",
+                        action="store_true",
+                        help="database info",
+                        default=False)
+
+
     args = parser.parse_args()
 
     if args.examplefile:
@@ -78,15 +96,25 @@ def command_line_interface():
         sys.exit()
 
     db = markdown.load_database(db_path)
-    #db.print_summary()
-    if args.exam_file:
-        exam = Exam(db,
-                    select_collection=args.tag,
-                    quest_info=args.quest_info,
-                    question_label=args.quest_label)
-        exam.print_summary()
-        markdown.save_markdown_file(exam, args.exam_file,)
+    if args.info:
+        db.unselect_all()
+        db.print_summary()
+        exit()
+
+    if args.unselect_all:
+        db.unselect_all()
 
     if args.rewrite:
         print(f"rewrite {db_path}")
         markdown.save_database_folder(db, db_path)
+
+    exam = Exam(db,
+                select_collection=args.tag,
+                uuid_file=args.uuid_file,
+                quest_info=args.quest_info,
+                question_label=args.quest_label)
+    exam.print_summary()
+    if args.exam_file:
+        markdown.save_markdown_file(exam, args.exam_file,)
+
+

@@ -64,7 +64,7 @@ class Exam(QuestionDB):
         cnt = 0
         if select_collection is not None and uuid_file is not None:
             raise ValueError("Selection by both collection and UUID file is not possible")
-
+            print("jj")
         if uuid_file is not None:
             selected_uuids, _ = Exam.load_uuid_file(uuid_file)
         else:
