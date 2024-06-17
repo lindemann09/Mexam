@@ -81,7 +81,7 @@ def command_line_interface():
     #db.print_summary()
     if args.exam_file:
         exam = Exam(db,
-                    collection=args.tag,
+                    select_collection=args.tag,
                     quest_info=args.quest_info,
                     question_label=args.quest_label)
         exam.print_summary()

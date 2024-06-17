@@ -2,7 +2,8 @@
 """
 
 from itertools import groupby
-from typing import List, Optional
+from typing import List, Optional, Union
+from uuid import UUID
 
 from .question import TQuestion
 
@@ -51,14 +52,21 @@ class QuestionDB(object):
         for x in self._questions:
             x.selected = False
 
-    def store_selection(self, tag:str):
+    def store_collection(self, tag:str):
         """store selected items using the property 'collection'"""
         for x in self._questions:
             if x.selected:
                 x.collection.add(tag)
                 x.selected = False
 
-    def set_selection(self, tag:str):
+    def set_collection(self, tag:str):
         """selects all items that have the 'collection' tag"""
         for x in self._questions:
             x.selected = tag in x.collection
+
+    def get_question(self, uuid:Union[str, UUID]) -> Union[None, TQuestion]:
+        if isinstance(uuid, str):
+            uuid = UUID(uuid)
+        for x in self._questions:
+            if x.uuid == uuid:
+                return x

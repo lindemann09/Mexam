@@ -4,11 +4,14 @@ Python 3
 """
 
 from copy import deepcopy
+from pathlib import Path
 import random
-from typing import Optional
+from typing import List, Optional, Tuple, Union
+from uuid import UUID
 from . import abc_settings, misc
 from .question import (TBilingualQuestion, MCBilingualQuestion, MCQuestion, OpenQuestion)
 from .question_db import QuestionDB
+from .misc import FILE_ENCODING
 
 class ExamSettings(abc_settings.ABCSettings):
     EXAMPLE = """## randomization
@@ -41,7 +44,8 @@ class Exam(QuestionDB):
     def __init__(self,
                  question_db: QuestionDB,
                  name: str = "No Exam Name",
-                 collection: Optional[str]=None,
+                 uuid_file:Union[None, str, Path] = None,
+                 select_collection: Optional[str]=None,
                  sort_by_topics: bool = True,
                  counter_in_title: bool = True,
                  question_label: bool = True,
@@ -55,14 +59,29 @@ class Exam(QuestionDB):
         self.name = name
         self.question_label = question_label
         self.quest_info = quest_info
+        self._counter_in_title = counter_in_title
+
         cnt = 0
-        # copy selected
-        for q in question_db.questions:
-            if collection is None:
-                sel = q.selected
-            else:
-                sel = collection in q.collection
-            if sel:
+        if select_collection is not None and uuid_file is not None:
+            raise ValueError("Selection by both collection and UUID file is not possible")
+
+        if uuid_file is not None:
+            selected_uuids, _ = Exam.load_uuid_file(uuid_file)
+        else:
+            # find uuids
+            selected_uuids:List[UUID] = []
+            for q in question_db.questions:
+                if select_collection is None:
+                    sel = q.selected
+                else:
+                    sel = select_collection in q.collection
+                if sel:
+                    selected_uuids.append(q.uuid)
+
+        # copy selected question
+        for u in selected_uuids:
+            q = question_db.get_question(u)
+            if q is not None:
                 q = deepcopy(q)
                 if counter_in_title:
                     cnt += 1
@@ -70,7 +89,6 @@ class Exam(QuestionDB):
                 else:
                     q.title = f"{q.title}"
                 self.add_question(q, sort_by_topics=False)
-
 
         if sort_by_topics:
             self.sort_by_topics()
@@ -84,7 +102,7 @@ class Exam(QuestionDB):
             rtn += "{}\n".format(h)
         return misc.short_hash(rtn)
 
-    def __str__(self):
+    def str_all_questions(self):
         """returns string of all questions """
 
         rtn = ""
@@ -97,6 +115,15 @@ class Exam(QuestionDB):
             else:
                 rtn += "{0}\n".format(question.question) # type: ignore
         return rtn
+
+    def str_title_uuid(self):
+        rtn = ""
+        for x in self._questions:
+            rtn += f"{x.short_hash} {x.title}\n"
+        return rtn
+
+    def __str__(self):
+        return self.str_title_uuid()
 
     def shuffle_questions(self, sort_by_topics=True):
         """randomize order of questions.
@@ -189,6 +216,32 @@ class Exam(QuestionDB):
 
         return txt
 
+    def uuid_list(self) -> List[str]:
+        return [str(q.uuid) for q in self._questions]
+
+    def save_uuids(self, file_path:Union[str, Path]):
+        with open(file_path, "w", encoding=FILE_ENCODING) as fl:
+            i = 0
+            for x in self._questions:
+                if self._counter_in_title:
+                    i = x.title.find(":") + 2 # remove number
+
+                fl.write(f"{x.uuid}, {x.title[i:]}\n")
+
+    @staticmethod
+    def load_uuid_file(uuid_file:Union[str, Path]) -> Tuple[List[UUID], List[str]]:
+        uuids:List[UUID] = []
+        title:List[str] = []
+        with open(uuid_file, "r", encoding=FILE_ENCODING) as fl:
+            for x in fl.readlines():
+                a = x.split(",", maxsplit=1)
+                uuids.append(UUID(a[0].strip()))
+                try:
+                    title.append(a[1].strip())
+                except IndexError:
+                    title.append("")
+
+        return uuids, title
 
 def make_exam(settings:ExamSettings, database:QuestionDB)->  Exam:
 
