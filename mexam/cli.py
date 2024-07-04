@@ -134,12 +134,14 @@ def command_line_interface():
             hashes = list(exam.question_hash_list)
 
         coll = [x.collection_string for x in exam.questions]
-        for i, (u, t, h, c) in enumerate(zip(exam.uuids(), exam.titles(), hashes, coll)):
-            txt = f" {i+1}) "
+        topics = [x.topic for x in exam.questions]
+        for i, (top, u, t, h, c) in enumerate(zip(topics, exam.uuids(), exam.titles(), hashes, coll)):
+            txt = f" {i+1:2d}) "
             if args.uuids:
                 txt += f" {u},"
             if args.hashes:
                 txt += f" {h},"
+            txt += f" {top},"
             if args.titles:
                 txt += f" {t},"
             if args.collections:
