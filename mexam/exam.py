@@ -95,13 +95,6 @@ class Exam(QuestionDB):
         # unselect_all
         self.unselect_all()
 
-    @property
-    def short_hash(self):
-        rtn = ""
-        for h in self.question_hash_list:
-            rtn += "{}\n".format(h)
-        return misc.short_hash(rtn)
-
     def str_all_questions(self):
         """returns string of all questions """
 
@@ -216,17 +209,23 @@ class Exam(QuestionDB):
 
         return txt
 
-    def uuid_list(self) -> List[str]:
+    def uuids(self) -> List[str]:
         return [str(q.uuid) for q in self._questions]
 
-    def save_uuids(self, file_path:Union[str, Path]):
-        with open(file_path, "w", encoding=FILE_ENCODING) as fl:
-            i = 0
-            for x in self._questions:
-                if self._counter_in_title:
-                    i = x.title.find(":") + 2 # remove number
+    def titles(self) -> List[str]:
+        rtn = []
+        for x in self._questions:
+            if self._counter_in_title:
+                i = x.title.find(":") + 2 # remove number
+            else:
+                i = 0
+            rtn.append(x.title[i:])
+        return rtn
 
-                fl.write(f"{x.uuid}, {x.title[i:]}\n")
+    def save_uuid_file(self, file_path:Union[str, Path]):
+        with open(file_path, "w", encoding=FILE_ENCODING) as fl:
+            for u, t in zip(self.uuids(), self.titles()):
+                fl.write(f"{u}, {t}\n")
 
     @staticmethod
     def load_uuid_file(uuid_file:Union[str, Path]) -> Tuple[List[UUID], List[str]]:

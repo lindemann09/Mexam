@@ -32,7 +32,6 @@ def command_line_interface():
                     dest='uuid_file',
                     help='UUID file')
 
-
     parser.add_argument("-e", action='store',
                         dest='exam_file',
                         help="exam file name",
@@ -58,15 +57,22 @@ def command_line_interface():
                         action="store_true",
                         help="show hashes",
                         default=False)
-    parser.add_argument("--label_list", dest="hashes",
+    parser.add_argument("--uuids", dest="uuids",
                         action="store_true",
-                        help="show labels",
+                        help="show uuids",
+                        default=False)
+    parser.add_argument("--titles", dest="titles",
+                        action="store_true",
+                        help="show titles",
+                        default=False)
+    parser.add_argument("--collections", dest="collections",
+                        action="store_true",
+                        help="show associates collections",
                         default=False)
     parser.add_argument("--test_matrix", dest="matrix",
                         action="store_true",
                         help="show text matrix",
                         default=False)
-
     # database function
     parser.add_argument("--unselect", dest="unselect_all",
                         action="store_true",
@@ -108,12 +114,38 @@ def command_line_interface():
         print(f"rewrite {db_path}")
         markdown.save_database_folder(db, db_path)
 
+    # selected items to exam
+
     exam = Exam(db,
                 select_collection=args.tag,
                 uuid_file=args.uuid_file,
                 quest_info=args.quest_info,
                 question_label=args.quest_label)
+
     exam.print_summary()
+
+    # print info
+    if args.titles or args.uuids or args.hashes:
+        hashes = exam.get_short_hashes_bilingual()
+        if len(hashes["L1"]) > 0:
+            # is bilingual
+            hashes = [f"{x}, {y}" for x,y in zip(hashes["L1"], hashes["L2"])]
+        else:
+            hashes = list(exam.question_hash_list)
+
+        coll = [x.collection_string for x in exam.questions]
+        for i, (u, t, h, c) in enumerate(zip(exam.uuids(), exam.titles(), hashes, coll)):
+            txt = f" {i+1}) "
+            if args.uuids:
+                txt += f" {u},"
+            if args.hashes:
+                txt += f" {h},"
+            if args.titles:
+                txt += f" {t},"
+            if args.collections:
+                txt += f" [{c}],"
+            print(txt[:-1])
+
     if args.exam_file:
         markdown.save_markdown_file(exam, args.exam_file,)
 

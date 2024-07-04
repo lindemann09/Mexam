@@ -75,7 +75,7 @@ class TQuestion(metaclass=ABCMeta):
 
     @property
     def collection_string(self) -> str:
-        return ",".join(sorted(self.collection))
+        return ", ".join(sorted(self.collection))
 
     def get_info_dict(self, add_title:bool,
                       add_selected:bool,
