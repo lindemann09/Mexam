@@ -12,6 +12,7 @@ class QuestionDB(object):
 
     def __init__(self):
         self._questions: List[TQuestion] = []
+        self.ignored_content: str = ""
 
     @property
     def questions(self) -> List[TQuestion]:

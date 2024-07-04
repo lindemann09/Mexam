@@ -1,5 +1,6 @@
+from datetime import datetime
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 from .. import question as q
 from ..exam import ExamSettings
@@ -76,6 +77,7 @@ class _MDParser(object):
 
     def parse(self, lines: Union[str, List[str]]) -> QuestionDB:
         rtn = QuestionDB()
+        ignored: Dict[str, str] = {}
 
         if isinstance(lines, str):
             lines = lines.splitlines()
@@ -97,9 +99,8 @@ class _MDParser(object):
                 if self.question_in_cache:
                     rtn.add_question(self._make_question())
                 self._set_quest_header(x)
-                continue
 
-            if isinstance(self._quest_header, MDQuestionHeader):
+            elif isinstance(self._quest_header, MDQuestionHeader):
                 if self._quest_header.parse_info(ln):
                     continue
 
@@ -111,12 +112,29 @@ class _MDParser(object):
 
                 if len(self._quest_langs) > 0:
                     self._quest_langs[-1].parse(ln)
+            else:
+                if self._topic in ignored:
+                    ignored[self._topic] += ln + "\n"
+                else:
+                    ignored[self._topic] = ln + "\n"
+
 
         if self.question_in_cache:
             rtn.add_question(self._make_question())
 
+        # ignored content
+        for topic, txt in ignored.items():
+            txt = txt.strip()
+            if len(txt)>0:
+                rtn.ignored_content += f"[TOPIC {datetime.now()}] {topic}\n"
+                rtn.ignored_content += f"{txt}\n\n"
+
         return rtn
 
 
+
+
 def parse(lines: Union[str, List[str]]) -> QuestionDB:
-    return _MDParser().parse(lines)
+    # return questionBD and ignored content
+    parser = _MDParser()
+    return parser.parse(lines)

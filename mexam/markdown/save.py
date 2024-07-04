@@ -20,7 +20,7 @@ def save_database_folder(db: QuestionDB,
         raise RuntimeError(
             f"can't created a folder. {path} is a existing files.")
     elif path.is_dir():
-        # clear all files with suffix
+        # get all files with suffix
         old_files = [x.absolute() for x in all_files(path, suffix=SUFFIX)]
     else:
         path.mkdir(exist_ok=True)
@@ -48,6 +48,11 @@ def save_database_folder(db: QuestionDB,
             with open(fl, 'w', encoding=FILE_ENCODING) as f:
                 f.truncate(0)
 
+    # write ignored
+    if len(db.ignored_content) > 0:
+        with open(path.joinpath("markdown_content.ignored"),
+                "a", encoding=FILE_ENCODING) as fl:
+            fl.write(db.ignored_content)
     return saved_files
 
 
@@ -64,7 +69,6 @@ def save_markdown_file(db: QuestionDB,
                        topic_headings: bool = False,
                        short_hash: bool = True,
                        selected_only: bool = False):
-
     if isinstance(db, Exam):
         content = f"# {db.name}\n\n"
     else:
@@ -82,7 +86,14 @@ def save_markdown_file(db: QuestionDB,
                                    selected_only=selected_only)
 
     content += "\n".join(md_dict.values())
-    write_if_different(Path(path), content)
+
+    # ẃrite
+    path = Path(path)
+    write_if_different(path, content)
+    if len(db.ignored_content) > 0:
+        with open(path.with_suffix(path.suffix+".ignored"),
+                  "a", encoding=FILE_ENCODING) as fl:
+            fl.write(db.ignored_content)
 
 
 def _database_to_md_dict(db: QuestionDB,
