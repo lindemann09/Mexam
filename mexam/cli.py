@@ -22,68 +22,71 @@ def command_line_interface():
         description="Mexam {}: Make exam".format(__version__),
         epilog="(c) O. Lindemann")
     parser.add_argument("DATABASE", nargs='?', default=None,
-                        help="the path to database folder or file")
+                        help="the path to database folder or file") ## always
 
     parser.add_argument('-s', action='store',
                     dest='tag',
-                    help='Select collection')
+                    help='Select collection') ## EXAM and INFO
 
     parser.add_argument('-u', action='store',
                     dest='uuid_file',
-                    help='UUID file')
+                    help='UUID file') ## EXAM and INFO
 
-    parser.add_argument("-e", action='store',
+    parser.add_argument("-f", action='store',
                         dest='exam_file',
-                        help="exam file name",
-                        default=False)
+                        help="save exam to file",
+                        default=False) ## SAVE EXAM
     parser.add_argument("-i", dest="quest_info",
                         action="store_true",
                         help="include question info",
-                        default=False)
+                        default=False) ## SAVE  EXAM
     parser.add_argument("-l", dest="quest_label",
                         action="store_true",
                         help="use question labels instead language indicators",
-                        default=False)
+                        default=False) ## SAVE  EXAM
 
-    parser.add_argument("-R", "--rewrite", dest="rewrite",
-                        action="store_true",
-                        help="rewrite database",
-                        default=False)
-    parser.add_argument("--example-settings", dest="examplefile",
-                        action="store_true",
-                        help="print example settings file",
-                        default=False)
     parser.add_argument("--hash_codes", dest="hashes",
                         action="store_true",
                         help="show hashes",
-                        default=False)
+                        default=False) ## INFO
+
     parser.add_argument("--uuids", dest="uuids",
                         action="store_true",
                         help="show uuids",
-                        default=False)
+                        default=False) ## INFO
     parser.add_argument("--titles", dest="titles",
                         action="store_true",
                         help="show titles",
-                        default=False)
+                        default=False) ## INFO
     parser.add_argument("--collections", dest="collections",
                         action="store_true",
                         help="show associates collections",
-                        default=False)
+                        default=False) ## INFO
     parser.add_argument("--test_matrix", dest="matrix",
                         action="store_true",
                         help="show text matrix",
-                        default=False)
+                        default=False) ## INFO
+
+
     # database function
+    parser.add_argument("-R", "--rewrite", dest="rewrite",
+                        action="store_true",
+                        help="rewrite database",
+                        default=False) # DB
     parser.add_argument("--unselect", dest="unselect_all",
                         action="store_true",
                         help="unselect all questions (to save in DB use '-R')",
-                        default=False)
+                        default=False) # DB
 
     parser.add_argument("--info", dest="info",
                         action="store_true",
                         help="database info",
-                        default=False)
-
+                        default=False) # always DB
+    ## misc
+    parser.add_argument("--example-settings", dest="examplefile",
+                    action="store_true",
+                    help="print example settings file",
+                    default=False)
 
     args = parser.parse_args()
 
@@ -125,7 +128,7 @@ def command_line_interface():
     exam.print_summary()
 
     # print info
-    if args.titles or args.uuids or args.hashes:
+    if args.titles or args.uuids or args.hashes or args.collections:
         hashes = exam.get_short_hashes_bilingual()
         if len(hashes["L1"]) > 0:
             # is bilingual
@@ -149,6 +152,6 @@ def command_line_interface():
             print(txt[:-1])
 
     if args.exam_file:
-        markdown.save_markdown_file(exam, args.exam_file,)
+        markdown.save_markdown_file(exam, args.exam_file)
 
 
