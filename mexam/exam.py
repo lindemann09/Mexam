@@ -8,7 +8,7 @@ from pathlib import Path
 import random
 from typing import List, Optional, Tuple, Union
 from uuid import UUID
-from . import abc_settings, misc
+from . import abc_settings
 from .question import (TBilingualQuestion, MCBilingualQuestion, MCQuestion, OpenQuestion)
 from .question_db import QuestionDB
 from .misc import FILE_ENCODING
