@@ -209,6 +209,9 @@ class Exam(QuestionDB):
 
         return txt
 
+    def topics(self)  -> List[str]:
+        return [x.topic for x in self.questions]
+
     def uuids(self) -> List[str]:
         return [str(q.uuid) for q in self._questions]
 
@@ -224,11 +227,15 @@ class Exam(QuestionDB):
 
     def save_uuid_file(self, file_path:Union[str, Path]):
         with open(file_path, "w", encoding=FILE_ENCODING) as fl:
-            for u, t in zip(self.uuids(), self.titles()):
-                fl.write(f"{u}, {t}\n")
+            for u, tp, t in zip(self.uuids(), self.topics(), self.titles()):
+                fl.write(f"{u}, {tp}, {t}\n")
 
     @staticmethod
     def load_uuid_file(uuid_file:Union[str, Path]) -> Tuple[List[UUID], List[str]]:
+        """loads text with uuids.
+        Text file can be a csv file without column names. In this case, uuids
+        have to be in the first column
+        """
         uuids:List[UUID] = []
         title:List[str] = []
         with open(uuid_file, "r", encoding=FILE_ENCODING) as fl:

@@ -137,8 +137,7 @@ def command_line_interface():
             hashes = list(exam.question_hash_list)
 
         coll = [x.collection_string for x in exam.questions]
-        topics = [x.topic for x in exam.questions]
-        for i, (top, u, t, h, c) in enumerate(zip(topics, exam.uuids(), exam.titles(), hashes, coll)):
+        for i, (top, u, t, h, c) in enumerate(zip(exam.topics(), exam.uuids(), exam.titles(), hashes, coll)):
             txt = f" {i+1:2d}) "
             if args.uuids:
                 txt += f" {u},"
