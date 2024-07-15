@@ -14,7 +14,7 @@ from pathlib import Path
 
 from . import __version__
 #from .misc import  make_filename
-from . import  markdown,  Exam, ExamSettings
+from . import  markdown,  Exam   #, ExamSettings
 #from .tex import LatexFiles, LatexSettings, run_latex
 
 def command_line_interface():
@@ -28,7 +28,7 @@ def command_line_interface():
     cmd_db = subparsers.add_parser('db') ## database
 
     # database function
-    cmd_db.add_argument("-r", "--rewrite", dest="rewrite",
+    cmd_db.add_argument("--rewrite", dest="rewrite",
                         action="store_true",
                         help="rewrite database",
                         default=False)
@@ -36,39 +36,39 @@ def command_line_interface():
                         action="store_true",
                         help="unselect all questions",
                         default=False)
-    cmd_db.add_argument("--store-collection", dest="TAG",
+    cmd_db.add_argument("--store-collection", dest="NEW_TAG",
                         action="store",
                         help="save current selection as collection with the name <TAG> and unselect all.",
                         default=False)
     cmd_db.add_argument("--add-selection", dest="TAG_ADD",
                         action="store",
-                        help="add a selection to all question of the collection <TAG_ADD>",
+                        help="add a selection mark ('XX') to all question of the collection <TAG_ADD>",
                         default=False)
 
 
-    cmd_exam = subparsers.add_parser('exam') ## database
+    cmd_save = subparsers.add_parser('save') ## database
     #cmd_exam.add_argument("DATABASE", help="path to database folder or file")
-    cmd_exam.add_argument('--md', action='store',
+    cmd_save.add_argument('--md', action='store',
                     dest='exam_file',
                     help='save exam to markdown file')
 
-    cmd_exam.add_argument('--uuids', action='store',
+    cmd_save.add_argument('--uuids', action='store',
                     dest='file',
                     help='save uuids of exam')
 
-    cmd_exam.add_argument('-S', action='store',
+    cmd_save.add_argument('-S', action='store',
                     dest='tag',
                     help='select collection') ## EXAM and INFO
 
-    cmd_exam.add_argument('-U', action='store',
+    cmd_save.add_argument('-U', action='store',
                     dest="uuid_file",
                     help='select by UUID file') ## EXAM and INFO
 
-    cmd_exam.add_argument("-i", dest="quest_info",
+    cmd_save.add_argument("-i", dest="quest_info",
                         action="store_true",
                         help="include question info",
                         default=False)
-    cmd_exam.add_argument("-l", dest="quest_label",
+    cmd_save.add_argument("-l", dest="quest_label",
                         action="store_true",
                         help="use question labels instead language indicators",
                         default=False)
@@ -101,6 +101,10 @@ def command_line_interface():
                         action="store_true",
                         help="show text matrix",
                         default=False)
+    cmd_show.add_argument("-M",  dest="show_markdown",
+                        action="store_true",
+                        help="show markdown code",
+                        default=False)
     ## misc
     #parser.add_argument("--example-settings", dest="examplefile",
     #                action="store_true",
@@ -128,19 +132,33 @@ def command_line_interface():
             # add selection
             if args.unselect_all:
                 info_exit("You can't add a selection and unselect all.")
-            if args.TAG:
+            elif args.NEW_TAG:
                 info_exit("You can't add a selection and store a collection in one step.")
+            elif ask_yes_no(f"Add selection mark ('XX') to all items of the collection '{args.TAG_ADD}'"):
+                db.set_collection(tag=args.TAG_ADD)
+            else:
+                exit()
 
-            db.set_collection(tag=args.TAG_ADD)
-        if args.TAG:
-            db.store_collection(tag=args.TAG)
+        if args.NEW_TAG:
+            if ask_yes_no(f"Save current selection as collection '{args.NEW_TAG}'"):
+                db.set_collection(tag=args.NEW_TAG)
+            else:
+                exit()
+            db.store_collection(tag=args.NEW_TAG)
+
         if args.unselect_all:
-            db.unselect_all()
+            if ask_yes_no("Unselect all selected questions"):
+                db.unselect_all()
+            else:
+                exit()
+
         db.print_summary()
-        if args.rewrite or args.TAG or args.TAG_ADD or args.unselect_all:
+
+        if args.rewrite or args.NEW_TAG or args.TAG_ADD or args.unselect_all:
             print(f"** Rewrite {db_path} **")
             markdown.save_database_folder(db, db_path)
-
+        else:
+            info_exit(" ")
 
     elif args.cmd == "show":
         exam = Exam(db,
@@ -171,7 +189,10 @@ def command_line_interface():
                     txt += f" [{c}],"
                 print(txt[:-1])
 
-    elif args.cmd == "exam":
+        if args.show_markdown:
+         print(markdown.database_to_markdown(exam))
+
+    elif args.cmd == "save":
         exam = Exam(db,
                     select_collection=args.tag,
                     uuid_file=args.uuid_file,
@@ -185,8 +206,18 @@ def command_line_interface():
             info_exit("Please define either markdown or uuids destination file.")
 
     else:
-        info_exit("Please specify a command")
+        db.print_summary()
+        info_exit(" ")
 
+## helper
+def ask_yes_no(question:str, default_answer:bool =False):
+    reply = str(input(question + ' (yes/no): ')).lower().strip()
+    if reply[:1] == 'y':
+        return True
+    elif reply[:1] == 'n':
+        return False
+    else:
+        return default_answer
 
 def info_exit(feedback:str):
     print(feedback)
