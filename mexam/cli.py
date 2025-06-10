@@ -9,12 +9,11 @@ usage:
 
 import argparse
 import sys
-
 from pathlib import Path
 
-from . import __version__
 #from .misc import  make_filename
-from . import  markdown,  Exam   #, ExamSettings
+from . import Exam, __version__, markdown  #, ExamSettings
+
 #from .tex import LatexFiles, LatexSettings, run_latex
 
 def command_line_interface():
@@ -38,8 +37,8 @@ def command_line_interface():
                         default=False)
     cmd_db.add_argument("--store-collection", dest="NEW_TAG",
                         action="store",
-                        help="save current selection as collection with the name <TAG> and unselect all.",
-                        default=False)
+                        help="FIXME save current selection as collection with the name <TAG> and unselect all.",
+                        default=False) #FIXME does not work
     cmd_db.add_argument("--add-selection", dest="TAG_ADD",
                         action="store",
                         help="add a selection mark ('XX') to all question of the collection <TAG_ADD>",
