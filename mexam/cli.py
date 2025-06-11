@@ -12,7 +12,7 @@ import sys
 from pathlib import Path
 
 #from .misc import  make_filename
-from . import Exam, __version__, markdown  #, ExamSettings
+from . import Exam, __version__, markdown  # , ExamSettings
 
 #from .tex import LatexFiles, LatexSettings, run_latex
 
@@ -35,16 +35,18 @@ def command_line_interface():
                         action="store_true",
                         help="unselect all questions",
                         default=False)
-    cmd_db.add_argument("--store-collection", dest="NEW_TAG",
-                        action="store",
-                        help="FIXME save current selection as collection with the name <TAG> and unselect all.",
-                        default=False) #FIXME does not work
     cmd_db.add_argument("--add-selection", dest="TAG_ADD",
                         action="store",
                         help="add a selection mark ('XX') to all question of the collection <TAG_ADD>",
                         default=False)
-
-
+    cmd_db.add_argument("--store-collection", dest="NEW_TAG",
+                        action="store",
+                        help="save current selection as collection with the name <NEW_TAG> and unselect all.",
+                        default=False)
+    cmd_db.add_argument("--remove-collection", dest="REMOVE_TAG",
+                        action="store",
+                        help="remove collection from all questions.",
+                        default=False)
     cmd_save = subparsers.add_parser('save') ## database
     #cmd_exam.add_argument("DATABASE", help="path to database folder or file")
     cmd_save.add_argument('--md', action='store',
@@ -127,6 +129,8 @@ def command_line_interface():
     db = markdown.load_database(db_path)
 
     if args.cmd == "db":
+
+        rewrite = args.rewrite
         if args.TAG_ADD:
             # add selection
             if args.unselect_all:
@@ -134,26 +138,35 @@ def command_line_interface():
             elif args.NEW_TAG:
                 info_exit("You can't add a selection and store a collection in one step.")
             elif ask_yes_no(f"Add selection mark ('XX') to all items of the collection '{args.TAG_ADD}'"):
-                db.set_collection(tag=args.TAG_ADD)
+                db.set_collection(tag=args.TAG_ADD, keep_selected=True)
+                rewrite = True
             else:
                 exit()
 
         if args.NEW_TAG:
             if ask_yes_no(f"Save current selection as collection '{args.NEW_TAG}'"):
-                db.set_collection(tag=args.NEW_TAG)
+                db.store_collection(tag=args.NEW_TAG)
+                rewrite = True
             else:
                 exit()
-            db.store_collection(tag=args.NEW_TAG)
+        elif args.REMOVE_TAG:
+            if ask_yes_no(f"Remove collection '{args.REMOVE_TAG}' from all items"):
+                db.remove_collection(tag=args.REMOVE_TAG)
+                rewrite = True
+            else:
+                exit()
 
         if args.unselect_all:
             if ask_yes_no("Unselect all selected questions"):
                 db.unselect_all()
+                rewrite = True
             else:
                 exit()
 
         db.print_summary()
+        db.print_collections_selections()
 
-        if args.rewrite or args.NEW_TAG or args.TAG_ADD or args.unselect_all:
+        if rewrite:
             print(f"** Rewrite {db_path} **")
             markdown.save_database_folder(db, db_path)
         else:
