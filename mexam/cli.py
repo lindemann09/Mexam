@@ -24,7 +24,7 @@ def command_line_interface():
     parser.add_argument("DATABASE", help="path to database folder or file")
 
     subparsers = parser.add_subparsers(dest='cmd')
-    cmd_db = subparsers.add_parser('db') ## database
+    cmd_db = subparsers.add_parser('db', help ="handling database and its selections and collections") ## database
 
     # database function
     cmd_db.add_argument("--rewrite", dest="rewrite",
@@ -34,12 +34,12 @@ def command_line_interface():
 
     cmd_db.add_argument('-S', action='store',
                     dest='TAG',
-                    help="add a selection mark ('XX') to all question of the collection <TAG>",
+                    help="add a selection mark ('XX') to questions of the collection <TAG>",
                     default=False)
 
     cmd_db.add_argument('-U', action='store',
                     dest="UUID_FILE",
-                    help='select by UUID file') ## EXAM and INFO
+                    help="add a selection mark ('X') by UUID file")
 
     cmd_db.add_argument("--unselect", dest="unselect_all",
                         action="store_true",
@@ -55,34 +55,7 @@ def command_line_interface():
                         help="remove collection from all questions.",
                         default=False)
 
-    cmd_save = subparsers.add_parser('save') ## database
-    #cmd_exam.add_argument("DATABASE", help="path to database folder or file")
-    cmd_save.add_argument('-S', action='store',
-                    dest='TAG',
-                    help='select collection') ## EXAM and INFO
-
-    cmd_save.add_argument('-U', action='store',
-                    dest="UUID_FILE",
-                    help='select by UUID file') ## EXAM and INFO
-
-    cmd_save.add_argument('--md', action='store',
-                    dest='exam_file',
-                    help='save exam to markdown file')
-
-    cmd_save.add_argument('--uuids', action='store',
-                    dest='file',
-                    help='save uuids of exam')
-
-    cmd_save.add_argument("-i", dest="quest_info",
-                        action="store_true",
-                        help="include question info",
-                        default=False)
-    cmd_save.add_argument("-l", dest="quest_label",
-                        action="store_true",
-                        help="use question labels instead language indicators",
-                        default=False)
-
-    cmd_show = subparsers.add_parser('show') ## database
+    cmd_show = subparsers.add_parser('show', help="show selected questions")
     #cmd_show.add_argument("DATABASE", help="path to database folder or file")
     cmd_show.add_argument('-S', action='store',
                     dest='TAG',
@@ -114,6 +87,34 @@ def command_line_interface():
                         action="store_true",
                         help="show markdown code",
                         default=False)
+
+    cmd_save = subparsers.add_parser('save', help="save selected questions (Exam)") ## database
+    #cmd_exam.add_argument("DATABASE", help="path to database folder or file")
+    cmd_save.add_argument('-S', action='store',
+                    dest='TAG',
+                    help='select collection') ## EXAM and INFO
+
+    cmd_save.add_argument('-U', action='store',
+                    dest="UUID_FILE",
+                    help='select by UUID file') ## EXAM and INFO
+
+    cmd_save.add_argument('--md', action='store',
+                    dest='exam_file',
+                    help='save exam to markdown file')
+
+    cmd_save.add_argument('--uuids', action='store',
+                    dest='file',
+                    help='save uuids of exam')
+
+    cmd_save.add_argument("-i", dest="quest_info",
+                        action="store_true",
+                        help="include question info",
+                        default=False)
+    cmd_save.add_argument("-l", dest="quest_label",
+                        action="store_true",
+                        help="use question labels instead language indicators",
+                        default=False)
+
     ## misc
     #parser.add_argument("--example-settings", dest="examplefile",
     #                action="store_true",
