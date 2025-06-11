@@ -85,12 +85,25 @@ class QuestionDB(object):
                 x.collection.add(tag)
                 x.selected = False
 
-    def set_collection(self, tag:str, keep_selected:bool = False):
+    def select_collection(self, tag:str|None = None,keep_selected:bool = False):
         """selects all items that have the 'collection' tag"""
+
         for x in self._questions:
             if keep_selected and x.selected:
                 continue
-            x.selected = tag in x.collection
+            if tag is not None:
+                x.selected = tag in x.collection
+
+
+    def select_uuids(self, uuids:List[str]|List[UUID], keep_selected:bool = False):
+        """selects all items that have the 'collection' tag"""
+
+        uuid_strs = [str(u) for u in uuids]
+        for x in self._questions:
+            if keep_selected and x.selected:
+                continue
+            if str(x.uuid) in uuid_strs:
+                x.selected = True
 
     def remove_collection(self, tag:str):
         """removes the collection tag from all items"""

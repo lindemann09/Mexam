@@ -3,15 +3,17 @@
 Python 3
 """
 
+import random
 from copy import deepcopy
 from pathlib import Path
-import random
 from typing import List, Optional, Tuple, Union
 from uuid import UUID
+
 from . import abc_settings
-from .question import (TBilingualQuestion, MCBilingualQuestion, MCQuestion, OpenQuestion)
-from .question_db import QuestionDB
 from .misc import FILE_ENCODING
+from .question import MCBilingualQuestion, MCQuestion, OpenQuestion, TBilingualQuestion
+from .question_db import QuestionDB
+
 
 class ExamSettings(abc_settings.ABCSettings):
     EXAMPLE = """## randomization
@@ -64,7 +66,6 @@ class Exam(QuestionDB):
         cnt = 0
         if select_collection is not None and uuid_file is not None:
             raise ValueError("Selection by both collection and UUID file is not possible")
-            print("jj")
         if uuid_file is not None:
             selected_uuids, _ = Exam.load_uuid_file(uuid_file)
         else:

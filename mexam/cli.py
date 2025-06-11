@@ -31,14 +31,21 @@ def command_line_interface():
                         action="store_true",
                         help="rewrite database",
                         default=False)
+
+    cmd_db.add_argument('-S', action='store',
+                    dest='TAG',
+                    help="add a selection mark ('XX') to all question of the collection <TAG>",
+                    default=False)
+
+    cmd_db.add_argument('-U', action='store',
+                    dest="UUID_FILE",
+                    help='select by UUID file') ## EXAM and INFO
+
     cmd_db.add_argument("--unselect", dest="unselect_all",
                         action="store_true",
                         help="unselect all questions",
                         default=False)
-    cmd_db.add_argument("--add-selection", dest="TAG_ADD",
-                        action="store",
-                        help="add a selection mark ('XX') to all question of the collection <TAG_ADD>",
-                        default=False)
+
     cmd_db.add_argument("--store-collection", dest="NEW_TAG",
                         action="store",
                         help="save current selection as collection with the name <NEW_TAG> and unselect all.",
@@ -47,8 +54,17 @@ def command_line_interface():
                         action="store",
                         help="remove collection from all questions.",
                         default=False)
+
     cmd_save = subparsers.add_parser('save') ## database
     #cmd_exam.add_argument("DATABASE", help="path to database folder or file")
+    cmd_save.add_argument('-S', action='store',
+                    dest='TAG',
+                    help='select collection') ## EXAM and INFO
+
+    cmd_save.add_argument('-U', action='store',
+                    dest="UUID_FILE",
+                    help='select by UUID file') ## EXAM and INFO
+
     cmd_save.add_argument('--md', action='store',
                     dest='exam_file',
                     help='save exam to markdown file')
@@ -56,14 +72,6 @@ def command_line_interface():
     cmd_save.add_argument('--uuids', action='store',
                     dest='file',
                     help='save uuids of exam')
-
-    cmd_save.add_argument('-S', action='store',
-                    dest='tag',
-                    help='select collection') ## EXAM and INFO
-
-    cmd_save.add_argument('-U', action='store',
-                    dest="uuid_file",
-                    help='select by UUID file') ## EXAM and INFO
 
     cmd_save.add_argument("-i", dest="quest_info",
                         action="store_true",
@@ -77,10 +85,10 @@ def command_line_interface():
     cmd_show = subparsers.add_parser('show') ## database
     #cmd_show.add_argument("DATABASE", help="path to database folder or file")
     cmd_show.add_argument('-S', action='store',
-                    dest='tag',
+                    dest='TAG',
                     help='select collection')
     cmd_show.add_argument('-U', action='store',
-                    dest='uuid_file',
+                    dest='UUID_FILE',
                     help='select by UUID file')
     cmd_show.add_argument("-s", dest="hashes",
                         action="store_true",
@@ -131,14 +139,20 @@ def command_line_interface():
     if args.cmd == "db":
 
         rewrite = args.rewrite
-        if args.TAG_ADD:
+        if args.TAG or args.UUID_FILE:
             # add selection
             if args.unselect_all:
                 info_exit("You can't add a selection and unselect all.")
             elif args.NEW_TAG:
                 info_exit("You can't add a selection and store a collection in one step.")
-            elif ask_yes_no(f"Add selection mark ('XX') to all items of the collection '{args.TAG_ADD}'"):
-                db.set_collection(tag=args.TAG_ADD, keep_selected=True)
+            elif args.TAG and ask_yes_no(
+                    f"Add selection mark ('XX') to all items of the collection '{args.TAG}'"):
+                db.select_collection(tag=args.TAG, keep_selected=True)
+                rewrite = True
+            elif args.UUID_FILE and ask_yes_no(
+                    f"Add selection mark to all items listed in the uuid_file '{args.UUID_FILE}'"):
+                uuids, _ = Exam.load_uuid_file(args.UUID_FILE)
+                db.select_uuids(uuids=uuids, keep_selected=True)
                 rewrite = True
             else:
                 exit()
@@ -174,8 +188,8 @@ def command_line_interface():
 
     elif args.cmd == "show":
         exam = Exam(db,
-                    select_collection=args.tag,
-                    uuid_file=args.uuid_file)
+                    select_collection=args.TAG,
+                    uuid_file=args.UUID_FILE)
         exam.print_summary()
 
         # print info
@@ -206,8 +220,8 @@ def command_line_interface():
 
     elif args.cmd == "save":
         exam = Exam(db,
-                    select_collection=args.tag,
-                    uuid_file=args.uuid_file,
+                    select_collection=args.TAG,
+                    uuid_file=args.UUID_FILE,
                     quest_info=args.quest_info,
                     question_label=args.quest_label)
         if args.exam_file:
