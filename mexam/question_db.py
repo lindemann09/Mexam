@@ -96,7 +96,7 @@ class QuestionDB(object):
 
 
     def select_uuids(self, uuids:List[str]|List[UUID], keep_selected:bool = False):
-        """selects all items that have the 'collection' tag"""
+        """selects all items that have the UUID"""
 
         uuid_strs = [str(u) for u in uuids]
         for x in self._questions:
@@ -104,6 +104,21 @@ class QuestionDB(object):
                 continue
             if str(x.uuid) in uuid_strs:
                 x.selected = True
+
+    def add_selection_uuid(self, id_str:str) -> bool:
+        """select items that has a UUID starting with id_str
+        return False if no item found
+        """
+
+        found = False
+        for x in self._questions:
+            if str(x.uuid).startswith(id_str):
+                x.selected = True
+                if found:
+                    raise RuntimeError(f"Multiple UUIDs beginning with '{id_str}'")
+                found = True
+
+        return found
 
     def remove_collection(self, tag:str):
         """removes the collection tag from all items"""

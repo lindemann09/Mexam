@@ -32,14 +32,19 @@ def command_line_interface():
                         help="merely rewrite the database (e.g. to format questions or update hashes)",
                         default=False)
 
+    cmd_db.add_argument('--select', action='store',
+                    dest="ID",
+                    help="add selection mark ('XX')  question with a UUID beginning <ID> ")
+
     cmd_db.add_argument('-S', action='store',
                     dest='TAG',
-                    help="add a selection mark ('XX') to questions of the collection <TAG>",
+                    help="add selection marks ('XX') to questions of the collection <TAG>",
                     default=False)
 
     cmd_db.add_argument('-U', action='store',
                     dest="UUID_FILE",
-                    help="add a selection mark ('XX') by UUID file")
+                    help="add selection marks ('XX') by UUID file")
+
 
     cmd_db.add_argument("--unselect", dest="unselect_all",
                         action="store_true",
@@ -145,7 +150,8 @@ def command_line_interface():
     if args.cmd == "db":
 
         rewrite = args.rewrite
-        if args.TAG or args.UUID_FILE:
+
+        if args.TAG or args.UUID_FILE or args.ID:
             # add selection
             if args.unselect_all:
                 info_exit("You can't add a selection and unselect all.")
@@ -160,6 +166,17 @@ def command_line_interface():
                 uuids, _ = Exam.load_uuid_file(args.UUID_FILE)
                 db.select_uuids(uuids=uuids, keep_selected=True)
                 rewrite = True
+            elif args.ID:
+                try:
+                    found = db.add_selection_uuid(args.ID)
+                except RuntimeError as er:
+                    print(f"ERROR: {er}")
+                    exit()
+                if found:
+                    rewrite = True
+                else:
+                    print(f"Can't find UUID '{args.ID}'")
+                    exit()
             else:
                 exit()
 
