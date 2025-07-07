@@ -1,6 +1,6 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Union
 
 from .. import question as q
 from ..exam import ExamSettings
@@ -31,10 +31,8 @@ def load_database(path_or_setings: Union[str, Path, ExamSettings],
     elif path.is_file():
         files = [path]
     else:
-        files = []
-
-    if len(files) == 0:
-        raise RuntimeError(f"Can't open file(s) in {path} (suffix={suffix})")
+        print(f"Can't find file or folder: {path} (suffix={suffix})")
+        exit(1)
 
     lines = []
     for fl in files:
