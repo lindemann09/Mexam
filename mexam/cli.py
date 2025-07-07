@@ -11,8 +11,8 @@ import argparse
 import sys
 from pathlib import Path
 
-#from .misc import  make_filename
 from . import Exam, __version__, markdown  # , ExamSettings
+from .misc import str_fix_len
 
 #from .tex import LatexFiles, LatexSettings, run_latex
 
@@ -63,7 +63,11 @@ def command_line_interface():
     cmd_show.add_argument('-U', action='store',
                     dest='UUID_FILE',
                     help='select by UUID file')
-    cmd_show.add_argument("-s", dest="hashes",
+    cmd_show.add_argument("-a", dest="show_all",
+                        action="store_true",
+                        help="show all, same as `-uztc`",
+                        default=False)
+    cmd_show.add_argument("-z", dest="hashes",
                         action="store_true",
                         help="show hashes",
                         default=False)
@@ -79,38 +83,39 @@ def command_line_interface():
                         action="store_true",
                         help="show associates collections",
                         default=False)
-    cmd_show.add_argument("-m",  dest="matrix",
+    cmd_show.add_argument("-x",  dest="matrix",
                         action="store_true",
                         help="show text matrix",
                         default=False)
-    cmd_show.add_argument("-M",  dest="show_markdown",
+    cmd_show.add_argument("-m",  dest="show_markdown",
                         action="store_true",
                         help="show markdown code",
                         default=False)
 
-    cmd_save = subparsers.add_parser('save', help="save selected questions (Exam)") ## database
+    cmd_export = subparsers.add_parser('export', help="export selected questions (Exam)") ## database
+
     #cmd_exam.add_argument("DATABASE", help="path to database folder or file")
-    cmd_save.add_argument('-S', action='store',
+    cmd_export.add_argument('-S', action='store',
                     dest='TAG',
-                    help='select collection') ## EXAM and INFO
+                    help='use collection') ## EXAM and INFO
 
-    cmd_save.add_argument('-U', action='store',
+    cmd_export.add_argument('-U', action='store',
                     dest="UUID_FILE",
-                    help='select by UUID file') ## EXAM and INFO
+                    help='use selection from UUID file') ## EXAM and INFO
 
-    cmd_save.add_argument('--md', action='store',
+    cmd_export.add_argument('--md', action='store',
                     dest='exam_file',
-                    help='save exam to markdown file')
+                    help='export exam to markdown file')
 
-    cmd_save.add_argument('--uuids', action='store',
+    cmd_export.add_argument('--uuids', action='store',
                     dest='file',
-                    help='save uuids of exam')
+                    help='export uuids of exam')
 
-    cmd_save.add_argument("-i", dest="quest_info",
+    cmd_export.add_argument("-i", dest="quest_info",
                         action="store_true",
                         help="include question info",
                         default=False)
-    cmd_save.add_argument("-l", dest="quest_label",
+    cmd_export.add_argument("-l", dest="quest_label",
                         action="store_true",
                         help="use question labels instead language indicators",
                         default=False)
@@ -178,9 +183,7 @@ def command_line_interface():
             else:
                 exit()
 
-        db.print_summary()
-        db.print_collections_selections()
-
+        print(f"- selected: {db.n_selected}")
         if rewrite:
             print(f"** Rewrite {db_path} **")
             markdown.save_database_folder(db, db_path)
@@ -188,6 +191,12 @@ def command_line_interface():
             info_exit(" ")
 
     elif args.cmd == "show":
+        if args.show_all:
+            args.uuids = True
+            args.hashes = True
+            args.collections = True
+            args.titles = True
+
         exam = Exam(db,
                     select_collection=args.TAG,
                     uuid_file=args.UUID_FILE)
@@ -206,20 +215,26 @@ def command_line_interface():
             for i, (top, u, t, h, c) in enumerate(zip(exam.topics(), exam.short_uuids(), exam.titles(), hashes, coll)):
                 txt = f" {i+1:2d}) "
                 if args.uuids:
-                    txt += f" {u}...,"
+                    txt += f" {u} ..,"
                 if args.hashes:
                     txt += f" {h},"
-                txt += f" {top},"
+                if args.collections:
+                    # show collections, first selected collection
+                    s = c.replace(",", "")
+                    if args.TAG:
+                        s = s.replace(args.TAG, "").replace("  ", " ").strip()
+                        s = f"{args.TAG} {s}"
+                    txt += f" {str_fix_len(s.strip(), length=20)},"
+
+                txt += f" {str_fix_len(top, length=24, cut_left=False)},"
                 if args.titles:
                     txt += f" {t},"
-                if args.collections:
-                    txt += f" [{c}],"
                 print(txt[:-1])
 
         if args.show_markdown:
             print(markdown.database_to_markdown(exam))
 
-    elif args.cmd == "save":
+    elif args.cmd == "export":
         exam = Exam(db,
                     select_collection=args.TAG,
                     uuid_file=args.UUID_FILE,
@@ -234,7 +249,7 @@ def command_line_interface():
 
     else:
         db.print_summary()
-        info_exit(" ")
+        db.print_collections_selections()
 
 ## helper
 def ask_yes_no(question:str, default_answer:bool =False):

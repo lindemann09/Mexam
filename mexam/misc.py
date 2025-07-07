@@ -1,9 +1,9 @@
 """Text converter functions and Latex Code"""
-from pathlib import Path
 from hashlib import md5
+from pathlib import Path
 from random import shuffle
-from typing import List, Optional
 from time import ctime
+from typing import Any, List, Optional
 
 FILE_ENCODING = "utf-8"
 
@@ -32,6 +32,18 @@ def shuffle_fixed_positions(element_list, fixed_elements=()):
 
     return new_order
 
+def str_fix_len(txt:str, length:int=10, pad_char:str=' ', cut_left:bool=False):
+    d = length - len(txt)
+    if d > 0:
+        return txt + pad_char * d
+    elif d < 0:
+        d -= 2
+        if cut_left:
+            return ".." + txt[(-1*d):]
+        else:
+            return txt[:d] + ".."
+    else:
+        return txt
 
 def long_hash(content):
     return md5(content.encode(FILE_ENCODING, 'replace')).hexdigest()

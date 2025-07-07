@@ -1,8 +1,9 @@
 """base classes"""
 from abc import ABCMeta, abstractmethod
 from collections import OrderedDict
-from typing import Any, Dict, Optional,  Union
+from typing import Any, Dict, Optional, Union
 from uuid import UUID, uuid4
+
 from .. import misc
 
 NO_TOPIC = ""
@@ -75,7 +76,9 @@ class TQuestion(metaclass=ABCMeta):
 
     @property
     def collection_string(self) -> str:
-        return ", ".join(sorted(self.collection))
+        # (1) sort and ignore firdst letter, then (2) first letter reversed (T before R)
+        colls = sorted(self.collection,  key=lambda s: (s[1:], -ord(s[0].lower())))
+        return ", ".join(colls)
 
     def get_info_dict(self, add_title:bool,
                       add_selected:bool,
