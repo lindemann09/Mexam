@@ -1,13 +1,14 @@
 """database markdown definitions"""
 
-from copy import deepcopy
 import re
-from typing import List, Optional, Union
+from copy import deepcopy
+from typing import List, Optional, Tuple, Union
 
 from typing_extensions import Self
 
 from .. import question as q
 from ..misc import number_to_string
+
 
 class MDTopic(object):
     NO_TOPIC = "Undefined"
@@ -108,9 +109,9 @@ class MDQuestionHeader(object):
 class MDQuestion(object):
     # TODO FIXED POSITION NOT IMPLEMENTED
 
-    ANSWER = re.compile(r"^\s*-\s+(\*X\*)?\s*(.*)")  # "- (*X*) (...)"
+    RE_ANSWER = re.compile(r"^\s*-\s+(\*X\*)?\s*(.*)")  # "- (*X*) (...)"
     # **NL 56232**, or **EN**
-    QUEST_LANG = re.compile(r"^\s*\*\*(\w+)\s*(\w*)\*\*\s*$")
+    RE_QUEST_LANG = re.compile(r"^\s*\*\*(\w+)\s*(\w*)\*\*\s*$")
 
     def __init__(self,
                  language: str,
@@ -126,14 +127,14 @@ class MDQuestion(object):
         self.answers: List[q.Answer] = answers
 
     @classmethod
-    def create(cls, txt: str) -> Optional[Self]:
-        m = cls.QUEST_LANG.match(txt)
+    def create(cls, quest_lang_tag: str) -> Optional[Self]:
+        m = cls.RE_QUEST_LANG.match(quest_lang_tag)
         if m is not None:
             a, b = m.groups()
             return cls(language=a, short_hash=b)
 
     def parse(self, txt: str):
-        m = self.ANSWER.match(txt)
+        m = self.RE_ANSWER.match(txt)
         if m is not None:
             correct_tag, txt = m.groups()
             # add answer option
@@ -150,8 +151,9 @@ class MDQuestion(object):
 
     def to_mexam_question(self,
                       question_header: MDQuestionHeader,
-                      alt_topic="") -> Union[q.OpenQuestion,  q.MCQuestion]:
-        """returns a Mexam Open or MC Question"""
+                      alt_topic="") -> Tuple[Union[q.OpenQuestion,  q.MCQuestion], None | str]:
+        """returns a Mexam Open or MC Question and a string with the
+        inconsistent hash if the hash in the MD file is incorrect"""
 
         qh = deepcopy(question_header)
         try:
@@ -174,7 +176,6 @@ class MDQuestion(object):
             collection = qh.info.pop("collection")
         except KeyError:
             collection = None
-
 
         if len(self.answers) > 0:
             # MC Question
@@ -203,6 +204,6 @@ class MDQuestion(object):
                                  info=qh.info)
 
         if self.short_hash != rtn.short_hash:
-            print(f"  not fitting hash: {self.short_hash} -> {rtn.short_hash}")
-
-        return rtn
+            return rtn, self.short_hash
+        else:
+            return rtn, None

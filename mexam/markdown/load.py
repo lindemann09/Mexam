@@ -31,17 +31,20 @@ def load_database(path_or_setings: Union[str, Path, ExamSettings],
     elif path.is_file():
         files = [path]
     else:
-        files = []
-
-    if len(files) == 0:
-        raise RuntimeError(f"Can't open file(s) in {path} (suffix={suffix})")
+        print(f"Can't find file or folder: {path} (suffix={suffix})")
+        exit(1)
 
     lines = []
     for fl in files:
         with open(fl, "r", encoding=FILE_ENCODING) as f:
             lines.extend(f.readlines())
 
-    return parse(lines)
+    db, hash_issue_detected = parse(lines)
+
+    if hash_issue_detected:
+        print("*** Hash issues detected. Please rewrite the database. ***\n")
+
+    return db
 
 
 class _MDParser(object):
@@ -51,6 +54,8 @@ class _MDParser(object):
         self._quest_header = None
         # question in different languages
         self._quest_langs: List[MDQuestion] = []
+        self.hash_issue_detected = False
+
 
     def _set_quest_header(self, x: Optional[MDQuestionHeader]):
         self._quest_header = x
@@ -62,10 +67,18 @@ class _MDParser(object):
         return isinstance(self._quest_header, MDQuestionHeader) and \
             len(self._quest_langs) > 0
 
-    def _make_question(self) -> Union[None, q.TQuestion]:
+    def _make_mexam_question(self) -> Union[None, q.TQuestion]:
+
         if self.question_in_cache:
-            langs = [x.to_mexam_question(question_header=self._quest_header,  # type: ignore
-                                       alt_topic=self._topic) for x in self._quest_langs]
+            langs = []
+            for x in self._quest_langs:
+                quest, inconsistent_hash = x.to_mexam_question(question_header=self._quest_header,  # type: ignore
+                                       alt_topic=self._topic)
+                langs.append(quest)
+                if inconsistent_hash is not None:
+                    print(f"* not fitting hash: {inconsistent_hash} -> {quest.short_hash}")
+                    self.hash_issue_detected = True
+
             if len(langs) == 1:
                 return langs[0]
 
@@ -75,9 +88,11 @@ class _MDParser(object):
                 elif isinstance(langs[0], q.OpenQuestion) and isinstance(langs[1], q.OpenQuestion):
                     return q.BilingualOpenQuestion(langs[0], langs[1], uuid=langs[1].uuid)
 
-    def parse(self, lines: Union[str, List[str]]) -> QuestionDB:
+
+    def parse(self, lines: Union[str, List[str]]) -> Tuple[QuestionDB, bool]:
         rtn = QuestionDB()
         ignored: Dict[str, str] = {}
+        self.hash_issue_detected = False
 
         if isinstance(lines, str):
             lines = lines.splitlines()
@@ -88,7 +103,7 @@ class _MDParser(object):
             if x is not None:
                 # new topic
                 if self.question_in_cache:
-                    rtn.add_question(self._make_question())
+                    rtn.add_question(self._make_mexam_question())
                 self._set_quest_header(None)
                 self._topic = x.topic
                 continue
@@ -97,7 +112,7 @@ class _MDParser(object):
             if isinstance(x, MDQuestionHeader):
                 # new question
                 if self.question_in_cache:
-                    rtn.add_question(self._make_question())
+                    rtn.add_question(self._make_mexam_question())
                 self._set_quest_header(x)
 
             elif isinstance(self._quest_header, MDQuestionHeader):
@@ -120,7 +135,7 @@ class _MDParser(object):
 
 
         if self.question_in_cache:
-            rtn.add_question(self._make_question())
+            rtn.add_question(self._make_mexam_question())
 
         # ignored content
         for topic, txt in ignored.items():
@@ -129,12 +144,12 @@ class _MDParser(object):
                 rtn.ignored_content += f"[TOPIC {datetime.now()}] {topic}\n"
                 rtn.ignored_content += f"{txt}\n\n"
 
-        return rtn
+        return rtn, self.hash_issue_detected
 
 
 
 
-def parse(lines: Union[str, List[str]]) -> QuestionDB:
+def parse(lines: Union[str, List[str]]) -> Tuple[QuestionDB, bool]:
     # return questionBD and ignored content
     parser = _MDParser()
     return parser.parse(lines)

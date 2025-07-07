@@ -2,8 +2,8 @@
 from typing import Any, Dict, Optional, Union
 from uuid import UUID
 
-from .. import misc
 from .base import TOneLangQuestion
+
 
 class OpenQuestion(TOneLangQuestion):  # question with parts
 
@@ -49,6 +49,6 @@ class OpenQuestion(TOneLangQuestion):  # question with parts
 
     def add_part(self, question: str, points: float = 0, taxonomy: Union[int, str, None] = None):
         self._parts.append(question)
-        self.part_points.append(misc.try_int(points))
+        self.part_points.append(int(points))
         self.part_taxonomies.append(taxonomy)
 

@@ -29,7 +29,7 @@ def command_line_interface():
     # database function
     cmd_db.add_argument("--rewrite", dest="rewrite",
                         action="store_true",
-                        help="rewrite database",
+                        help="mere database rewrite (e.g. to update hashes)",
                         default=False)
 
     cmd_db.add_argument('-S', action='store',
