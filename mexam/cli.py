@@ -29,7 +29,7 @@ def command_line_interface():
     # database function
     cmd_db.add_argument("--rewrite", dest="rewrite",
                         action="store_true",
-                        help="mere database rewrite (e.g. to update hashes)",
+                        help="merely rewrite the database (e.g. to format questions or update hashes)",
                         default=False)
 
     cmd_db.add_argument('-S', action='store',
@@ -39,16 +39,16 @@ def command_line_interface():
 
     cmd_db.add_argument('-U', action='store',
                     dest="UUID_FILE",
-                    help="add a selection mark ('X') by UUID file")
+                    help="add a selection mark ('XX') by UUID file")
 
     cmd_db.add_argument("--unselect", dest="unselect_all",
                         action="store_true",
-                        help="unselect all questions",
+                        help="remove all selection marks ('XX')",
                         default=False)
 
     cmd_db.add_argument("--store-collection", dest="NEW_TAG",
                         action="store",
-                        help="save current selection as collection with the name <NEW_TAG> and unselect all.",
+                        help="save current selection as collection with the name <NEW_TAG> and remove all selection marks",
                         default=False)
     cmd_db.add_argument("--remove-collection", dest="REMOVE_TAG",
                         action="store",
@@ -69,7 +69,7 @@ def command_line_interface():
                         default=False)
     cmd_show.add_argument("-u",  dest="uuids",
                         action="store_true",
-                        help="show uuids",
+                        help="show short uuids",
                         default=False)
     cmd_show.add_argument("-t",  dest="titles",
                         action="store_true",
@@ -203,10 +203,10 @@ def command_line_interface():
                 hashes = list(exam.question_hash_list)
 
             coll = [x.collection_string for x in exam.questions]
-            for i, (top, u, t, h, c) in enumerate(zip(exam.topics(), exam.uuids(), exam.titles(), hashes, coll)):
+            for i, (top, u, t, h, c) in enumerate(zip(exam.topics(), exam.short_uuids(), exam.titles(), hashes, coll)):
                 txt = f" {i+1:2d}) "
                 if args.uuids:
-                    txt += f" {u},"
+                    txt += f" {u}...,"
                 if args.hashes:
                     txt += f" {h},"
                 txt += f" {top},"
@@ -217,7 +217,7 @@ def command_line_interface():
                 print(txt[:-1])
 
         if args.show_markdown:
-         print(markdown.database_to_markdown(exam))
+            print(markdown.database_to_markdown(exam))
 
     elif args.cmd == "save":
         exam = Exam(db,

@@ -216,6 +216,9 @@ class Exam(QuestionDB):
     def uuids(self) -> List[str]:
         return [str(q.uuid) for q in self._questions]
 
+    def short_uuids(self) -> List[str]:
+        return [str(q.short_uuid) for q in self._questions]
+
     def titles(self) -> List[str]:
         rtn = []
         for x in self._questions:
