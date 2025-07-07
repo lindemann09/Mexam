@@ -24,49 +24,49 @@ def command_line_interface():
     parser.add_argument("DATABASE", help="path to database folder or file")
 
     subparsers = parser.add_subparsers(dest='cmd')
-    cmd_db = subparsers.add_parser('db', help ="handling database and its selections and collections") ## database
+    cmd_edit = subparsers.add_parser('edit', help ="edit database and its selections and collections") ## database
 
     # database function
-    cmd_db.add_argument("--rewrite", dest="rewrite",
-                        action="store_true",
-                        help="merely rewrite the database (e.g. to format questions or update hashes)",
-                        default=False)
-
-    cmd_db.add_argument('--select', action='store',
+    cmd_edit.add_argument('-I', action='store',
                     dest="ID",
                     help="add selection mark ('XX')  question with a UUID beginning <ID> ")
 
-    cmd_db.add_argument('-S', action='store',
+    cmd_edit.add_argument('-C', action='store',
                     dest='TAG',
                     help="add selection marks ('XX') to questions of the collection <TAG>",
                     default=False)
 
-    cmd_db.add_argument('-U', action='store',
-                    dest="UUID_FILE",
+    cmd_edit.add_argument('-U', action='store',
+                    dest="UUID_FILE", metavar="FILE",
                     help="add selection marks ('XX') by UUID file")
 
 
-    cmd_db.add_argument("--unselect", dest="unselect_all",
+    cmd_edit.add_argument("--unselect", dest="unselect_all",
                         action="store_true",
                         help="remove all selection marks ('XX')",
                         default=False)
 
-    cmd_db.add_argument("--store-collection", dest="NEW_TAG",
+    cmd_edit.add_argument("--store-collection", dest="NEW_TAG",
                         action="store",
                         help="save current selection as collection with the name <NEW_TAG> and remove all selection marks",
                         default=False)
-    cmd_db.add_argument("--remove-collection", dest="REMOVE_TAG",
+    cmd_edit.add_argument("--remove-collection", dest="REMOVE_TAG",
                         action="store",
                         help="remove collection from all questions.",
                         default=False)
 
+    cmd_edit.add_argument("--rewrite", dest="rewrite",
+                        action="store_true",
+                        help="merely rewrite the database (e.g. to format questions or update hashes)",
+                        default=False)
+
     cmd_show = subparsers.add_parser('show', help="show selected questions")
     #cmd_show.add_argument("DATABASE", help="path to database folder or file")
-    cmd_show.add_argument('-S', action='store',
+    cmd_show.add_argument('-C', action='store',
                     dest='TAG',
                     help='select collection')
     cmd_show.add_argument('-U', action='store',
-                    dest='UUID_FILE',
+                    dest='UUID_FILE', metavar="FILE",
                     help='select by UUID file')
     cmd_show.add_argument("-a", dest="show_all",
                         action="store_true",
@@ -100,20 +100,20 @@ def command_line_interface():
     cmd_export = subparsers.add_parser('export', help="export selected questions (Exam)") ## database
 
     #cmd_exam.add_argument("DATABASE", help="path to database folder or file")
-    cmd_export.add_argument('-S', action='store',
+    cmd_export.add_argument('-C', action='store',
                     dest='TAG',
                     help='use collection') ## EXAM and INFO
 
     cmd_export.add_argument('-U', action='store',
-                    dest="UUID_FILE",
+                    dest="UUID_FILE", metavar="FILE",
                     help='use selection from UUID file') ## EXAM and INFO
 
     cmd_export.add_argument('--md', action='store',
-                    dest='exam_file',
+                    dest='exam_export', metavar="FILE",
                     help='export exam to markdown file')
 
     cmd_export.add_argument('--uuids', action='store',
-                    dest='file',
+                    dest='uuid_export', metavar="FILE",
                     help='export uuids of exam')
 
     cmd_export.add_argument("-i", dest="quest_info",
@@ -125,20 +125,7 @@ def command_line_interface():
                         help="use question labels instead language indicators",
                         default=False)
 
-    ## misc
-    #parser.add_argument("--example-settings", dest="examplefile",
-    #                action="store_true",
-    #                help="print example settings file",
-    #                default=False)
-
     args = parser.parse_args()
-
-    #if args.examplefile:
-    #    print("---")
-    #    print(ExamSettings.EXAMPLE)
-    #    print(LatexSettings.EXAMPLE)
-    #    print("...")
-    #    sys.exit()
 
     try:
         db_path = Path(args.DATABASE)
@@ -147,10 +134,10 @@ def command_line_interface():
 
     db = markdown.load_database(db_path)
 
-    if args.cmd == "db":
+    ## EDIT
+    if args.cmd == "edit":
 
         rewrite = args.rewrite
-
         if args.TAG or args.UUID_FILE or args.ID:
             # add selection
             if args.unselect_all:
@@ -207,6 +194,7 @@ def command_line_interface():
         else:
             info_exit(" ")
 
+    ## SHOW
     elif args.cmd == "show":
         if args.show_all:
             args.uuids = True
@@ -251,18 +239,32 @@ def command_line_interface():
         if args.show_markdown:
             print(markdown.database_to_markdown(exam))
 
+    ## EXPORT
     elif args.cmd == "export":
+
         exam = Exam(db,
                     select_collection=args.TAG,
                     uuid_file=args.UUID_FILE,
                     quest_info=args.quest_info,
                     question_label=args.quest_label)
-        if args.exam_file:
-            markdown.save_markdown_file(exam, args.exam_file)
-        elif args.file: ## uuids
-            exam.save_uuid_file(file_path=args.file)
-        else:
-            info_exit("Please define either markdown or uuids destination file.")
+        if exam.n_questions == 0:
+            info_exit("No questions defined. Use selection marker, collection tag or uuid file.")
+
+        if not args.exam_export and not args.uuid_export:
+            ## default
+            # Ask user for filename
+            filename = input("Enter the exam name: ")
+            args.exam_export = Path(filename).with_suffix('.md')
+            args.uuid_export = Path(filename).with_suffix('.uuid')
+            exam.question_label = True
+            exam.quest_info = False
+
+        if args.exam_export:
+            print(f"save {args.exam_export}")
+            markdown.save_markdown_file(exam, args.exam_export)
+        if args.uuid_export: ## uuids
+            print(f"save {args.uuid_export}")
+            exam.save_uuid_file(file_path=args.uuid_export)
 
     else:
         db.print_summary()
