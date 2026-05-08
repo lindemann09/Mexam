@@ -258,6 +258,7 @@ def make_exam(settings:ExamSettings, database:QuestionDB)->  Exam:
     exam = Exam(question_db=database,
                 name=settings.name,
                 sort_by_topics=settings.ignore_topic)
+    print("XXX selected exam questions:")
     exam.print_summary()
 
     if settings.seed is not None:

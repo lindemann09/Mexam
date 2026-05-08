@@ -59,13 +59,13 @@ class QuestionDB(object):
 
     def print_summary(self) -> None:
         """prints a summary of the question database"""
-        print(f"questions: {self.n_questions}")
+        print(f" questions: {self.n_questions}")
         cnt = 0
         for key, group in groupby(
                 map(lambda x: x.topic, self._questions)):
             cnt += 1
             n = len(list(group))
-            print(f" topic {cnt}: n = {n}, {key}")
+            print(f"  topic {cnt}: n = {n}, {key}")
 
     def print_collections_selections(self) -> None:
         """prints a summary of the question database with collections and selections"""
@@ -93,7 +93,6 @@ class QuestionDB(object):
                 continue
             if tag is not None:
                 x.selected = tag in x.collection
-
 
     def select_uuids(self, uuids:List[str]|List[UUID], keep_selected:bool = False):
         """selects all items that have the UUID"""
