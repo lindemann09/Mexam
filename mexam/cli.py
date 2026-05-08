@@ -205,7 +205,7 @@ def command_line_interface():
         exam = Exam(db,
                     select_collection=args.TAG,
                     uuid_file=args.UUID_FILE)
-        print("Summary of selected exam questions")
+        print("Summary of selected questions")
         exam.print_summary()
 
         # print info
@@ -268,7 +268,7 @@ def command_line_interface():
             exam.save_uuid_file(file_path=args.uuid_export)
 
     else:
-        print("Summary of database:")
+        print("Database summary")
         db.print_summary()
         db.print_collections_selections()
 
