@@ -90,15 +90,11 @@ def command_line_interface():
                         default=False)
     cmd_show.add_argument("-x",  dest="matrix",
                         action="store_true",
-                        help="show text matrix",
+                        help="show collection matrix",
                         default=False)
     cmd_show.add_argument("-m",  dest="show_markdown",
                         action="store_true",
                         help="show markdown code",
-                        default=False)
-    cmd_show.add_argument("--collection-matrix",  dest="matrix",
-                        action="store_true",
-                        help="show collection matrix",
                         default=False)
 
     cmd_export = subparsers.add_parser('export', help="export selected questions (Exam)") ## database
