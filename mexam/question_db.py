@@ -57,6 +57,18 @@ class QuestionDB(object):
                 collections.update(x.collection)
         return sorted(list(collections))
 
+    def get_collection_matrix(self) -> List[List[int]]:
+        """returns a matrix of shared items in collections"""
+        collections = self.get_collections()
+        matrix = [[0] * len(collections) for _ in range(len(collections))]
+        for x in self._questions:
+            if x.collection:
+                indices = [collections.index(tag) for tag in x.collection]
+                for i in indices:
+                    for j in indices:
+                        matrix[i][j] += 1
+        return matrix
+
     def print_summary(self) -> None:
         """prints a summary of the question database"""
         print(f" questions: {self.n_questions}")

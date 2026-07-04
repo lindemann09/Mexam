@@ -96,6 +96,10 @@ def command_line_interface():
                         action="store_true",
                         help="show markdown code",
                         default=False)
+    cmd_show.add_argument("--collection_matrix",  dest="matrix",
+                        action="store_true",
+                        help="show collection matrix",
+                        default=False)
 
     cmd_export = subparsers.add_parser('export', help="export selected questions (Exam)") ## database
 
@@ -240,6 +244,23 @@ def command_line_interface():
         if args.show_markdown:
             print(markdown.database_to_markdown(exam))
 
+        if args.matrix:
+            print(" Collection matrix")
+            matrix = db.get_collection_matrix()
+            collections = db.get_collections()
+            print(" "*11 + " ".join([f"{x:>7}" for x in collections]))
+            for i, row in enumerate(matrix):
+                line =  f"{collections[i]:>10} "
+                for j, x in enumerate(row):
+                    if i!=j:
+                        line += f"{x:>7} "
+                    else:
+                        line += "      . "
+
+                print(line)
+#            for i, row in enumerate(matrix):
+
+#                print(f"{collections[i]:>10} " + " ".join([f"{x:>7}" for x in row]))
     ## EXPORT
     elif args.cmd == "export":
 
