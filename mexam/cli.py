@@ -96,7 +96,7 @@ def command_line_interface():
                         action="store_true",
                         help="show markdown code",
                         default=False)
-    cmd_show.add_argument("--collection_matrix",  dest="matrix",
+    cmd_show.add_argument("--collection-matrix",  dest="matrix",
                         action="store_true",
                         help="show collection matrix",
                         default=False)
