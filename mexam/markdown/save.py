@@ -4,7 +4,7 @@ from typing import List, Union
 from ..misc import FILE_ENCODING, all_files, write_if_different
 from ..question_db import QuestionDB
 from .convert import database_to_markdown, database_to_md_dict
-from .load import SUFFIX
+from .md_lib import SUFFIX
 
 
 def save_database_folder(db: QuestionDB,

@@ -6,10 +6,9 @@ from .. import question as q
 from ..exam import ExamSettings
 from ..misc import FILE_ENCODING, all_files
 from ..question_db import QuestionDB
-from .md_lib import MDQuestion, MDQuestionHeader, MDTopic
+from .md_lib import SUFFIX, MDQuestion, MDQuestionHeader, MDTopic
+from .save import save_database_folder
 from .settings import MarkdownSettings
-
-SUFFIX = ".md"
 
 
 def load_database(path_or_setings: Union[str, Path, ExamSettings],
@@ -39,10 +38,13 @@ def load_database(path_or_setings: Union[str, Path, ExamSettings],
         with open(fl, "r", encoding=FILE_ENCODING) as f:
             lines.extend(f.readlines())
 
-    db, hash_issue_detected = parse(lines)
+    db, hash_issue_detected, missing_uuid = parse(lines)
 
-    if hash_issue_detected:
-        print("*** Hash issues detected. Please rewrite the database. ***\n")
+    if missing_uuid or hash_issue_detected:
+        if missing_uuid:
+            print("* missing UUID detected")
+        print("** Rewriting database **\n")
+        save_database_folder(db, path)
 
     return db
 
@@ -54,6 +56,7 @@ class _MDParser(object):
         self._quest_header = None
         # question in different languages
         self._quest_langs: List[MDQuestion] = []
+        self.uuid_missing_detected = False
         self.hash_issue_detected = False
 
 
@@ -72,12 +75,15 @@ class _MDParser(object):
         if self.question_in_cache:
             langs = []
             for x in self._quest_langs:
-                quest, inconsistent_hash = x.to_mexam_question(question_header=self._quest_header,  # type: ignore
+                quest, inconsistent_hash, new_uuid = x.to_mexam_question(
+                                        question_header=self._quest_header,  # type: ignore
                                        alt_topic=self._topic)
                 langs.append(quest)
                 if inconsistent_hash is not None:
                     print(f"* not fitting hash: {inconsistent_hash} -> {quest.short_hash}")
                     self.hash_issue_detected = True
+                if new_uuid:
+                    self.uuid_missing_detected = True
 
             if len(langs) == 1:
                 return langs[0]
@@ -89,9 +95,10 @@ class _MDParser(object):
                     return q.BilingualOpenQuestion(langs[0], langs[1], uuid=langs[1].uuid)
 
 
-    def parse(self, lines: Union[str, List[str]]) -> Tuple[QuestionDB, bool]:
+    def parse(self, lines: Union[str, List[str]]) -> Tuple[QuestionDB, bool, bool]:
         rtn = QuestionDB()
         ignored: Dict[str, str] = {}
+        self.uuid_missing_detected = False
         self.hash_issue_detected = False
 
         if isinstance(lines, str):
@@ -144,12 +151,12 @@ class _MDParser(object):
                 rtn.ignored_content += f"[TOPIC {datetime.now()}] {topic}\n"
                 rtn.ignored_content += f"{txt}\n\n"
 
-        return rtn, self.hash_issue_detected
+        return rtn, self.hash_issue_detected, self.uuid_missing_detected
 
 
 
 
-def parse(lines: Union[str, List[str]]) -> Tuple[QuestionDB, bool]:
+def parse(lines: Union[str, List[str]]) -> Tuple[QuestionDB, bool, bool]:
     # return questionBD and ignored content
     parser = _MDParser()
     return parser.parse(lines)

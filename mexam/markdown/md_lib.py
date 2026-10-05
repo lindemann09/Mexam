@@ -9,6 +9,7 @@ from typing_extensions import Self
 from .. import question as q
 from ..misc import number_to_string
 
+SUFFIX = ".md"
 
 class MDTopic(object):
     NO_TOPIC = "Undefined"
@@ -151,9 +152,11 @@ class MDQuestion(object):
 
     def to_mexam_question(self,
                       question_header: MDQuestionHeader,
-                      alt_topic="") -> Tuple[Union[q.OpenQuestion,  q.MCQuestion], None | str]:
+                      alt_topic="") -> Tuple[Union[q.OpenQuestion,  q.MCQuestion], None | str, bool]:
         """returns a Mexam Open or MC Question and a string with the
-        inconsistent hash if the hash in the MD file is incorrect"""
+        inconsistent hash if the hash in the MD file is incorrect
+        and a boolean indicating if a new UUID was created (True) or not (False)
+        """
 
         qh = deepcopy(question_header)
         try:
@@ -203,7 +206,8 @@ class MDQuestion(object):
                                  collection=collection,
                                  info=qh.info)
 
+        new_uuid_created = uuid is None
         if self.short_hash != rtn.short_hash:
-            return rtn, self.short_hash
+            return rtn, self.short_hash, new_uuid_created
         else:
-            return rtn, None
+            return rtn, None, new_uuid_created
