@@ -1,3 +1,3 @@
 # Mexam
 
-Multilingual exam questions in markdown
+Managing multilingual exam questions in markdown

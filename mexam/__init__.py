@@ -1,6 +1,7 @@
-"""Exams with Python and Latex
+"""Managing multilingual exam questions in markdown
 
-see cmd_line_interface for examples
+MEXAM command line tool for managing multilingual exam questions in markdown format.
+It allows you to create, edit, and organize exam questions in multiple languages.
 
 Oliver Lindemann
 """
