@@ -132,7 +132,9 @@ def command_line_interface():
     except TypeError:
         info_exit("Please specify a database file or folder")
 
-    db = markdown.load_database(db_path)
+
+    allow_rewrite = args.rewrite if hasattr(args, "rewrite") else False
+    db = markdown.load_database(db_path, allow_rewrite=allow_rewrite)
 
     ## EDIT
     if args.cmd == "edit":
@@ -189,7 +191,7 @@ def command_line_interface():
 
         print(f"- selected: {db.n_selected}")
         if rewrite:
-            print(f"** Rewrite {db_path} **")
+            print(f"*** Rewrite {db_path} ***")
             markdown.save_database_folder(db, db_path)
         else:
             info_exit(" ")

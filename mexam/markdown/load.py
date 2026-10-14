@@ -12,7 +12,8 @@ from .settings import MarkdownSettings
 
 
 def load_database(path_or_setings: Union[str, Path, ExamSettings],
-                  suffix: Optional[str] = None) -> QuestionDB:
+                  suffix: Optional[str] = None,
+                  allow_rewrite: bool = False) -> QuestionDB:
     if suffix is None:
         suffix = SUFFIX
 
@@ -43,8 +44,11 @@ def load_database(path_or_setings: Union[str, Path, ExamSettings],
     if missing_uuid or hash_issue_detected:
         if missing_uuid:
             print("* missing UUID detected")
-        print("** Rewriting database **\n")
-        save_database_folder(db, path)
+        if allow_rewrite:
+            print("*** Rewriting database ***\n")
+            save_database_folder(db, path)
+        else:
+            print("* Hint: Rewriting database might be required\n")
 
     return db
 
