@@ -71,7 +71,7 @@ class MCBilingualQuestion(TBilingualQuestion):
         joined = list(zip(self.L1.answers, self.L2.answers))
         fixed = list(filter(lambda x: x[0].fixed_position, joined))
         joined = misc.shuffle_fixed_positions(joined, fixed)
-        self.L1._answers, self.L2._answers = list(zip(*joined))  # unzip
+        self.L1._answers, self.L2._answers = list(zip(*joined))  # type: ignore # unzip
 
     def add_answer(self, L1_text: str, L2_text: str, is_correct: bool,
                    fixed_position: bool = False):

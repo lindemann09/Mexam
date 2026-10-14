@@ -5,11 +5,11 @@ from .cli import command_line_interface
 
 
 def run():
-    if sys.version_info[0] != 3 or sys.version_info[1] < 10:
+    if sys.version_info[0] != 3 or sys.version_info[1] < 13:
 
         raise RuntimeError(f"Mexam {__version__} is not compatible with Python" +
                            f"{sys.version_info[0]}.{sys.version_info[1]}." +
-            "\n\nPlease use Python 3.10 or higher.")
+            "\n\nPlease use Python 3.13 or higher.")
 
     command_line_interface()
 

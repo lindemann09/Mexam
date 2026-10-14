@@ -42,7 +42,7 @@ class TQuestion(metaclass=ABCMeta):
         if collection is None:
             self.collection = set()
         else:
-            self.collection = set([x.strip() for x in collection.split(",")])
+            self.collection = {x.strip() for x in collection.split(",")}
             self.collection.discard("")
 
         if uuid is None:
@@ -76,7 +76,7 @@ class TQuestion(metaclass=ABCMeta):
 
     @property
     def collection_string(self) -> str:
-        # (1) sort and ignore firdst letter, then (2) first letter reversed (T before R)
+        # (1) sort and ignore first letter, then (2) first letter reversed (T before R)
         colls = sorted(self.collection,  key=lambda s: (s[1:], -ord(s[0].lower())))
         return ", ".join(colls)
 
