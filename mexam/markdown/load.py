@@ -1,3 +1,4 @@
+import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -9,6 +10,7 @@ from .md_lib import SUFFIX, MDQuestion, MDQuestionHeader, MDTopic
 from .save import save_database_folder
 from .settings import MarkdownSettings
 
+MIN_LENGTH_QUESTION_TEXT = 8
 
 def load_database(path_or_setings: str | Path | ExamSettings,
                   suffix: str | None = None,
@@ -31,7 +33,7 @@ def load_database(path_or_setings: str | Path | ExamSettings,
         files = [path]
     else:
         print(f"Can't find file or folder: {path} (suffix={suffix})")
-        exit(1)
+        sys.exit(1)
 
     lines = []
     for fl in files:
@@ -129,13 +131,19 @@ class _MDParser:
                 if self._quest_header.parse_info(ln):
                     continue
 
-                x = MDQuestion.create(ln)
+                x = MDQuestion.new_language(ln)
                 if isinstance(x, MDQuestion):
                     # new question lang
                     self._quest_langs.append(x)
                     continue
 
-                if len(self._quest_langs) > 0:
+                elif len(self._quest_langs) > 0:
+                    # there already a language: add
+                    self._quest_langs[-1].parse(ln)
+                elif len(ln.strip()) > MIN_LENGTH_QUESTION_TEXT:
+                    # there is language, but add there is some substantial text
+                    x = MDQuestion(language="Q", short_hash="")
+                    self._quest_langs.append(x)
                     self._quest_langs[-1].parse(ln)
             else:
                 if self._topic in ignored:

@@ -106,7 +106,7 @@ class MDQuestionHeader():
 
 
 
-class MDQuestion():
+class MDQuestion:
     # TODO FIXED POSITION NOT IMPLEMENTED
 
     RE_ANSWER = re.compile(r"^\s*-\s+(\*X\*)?\s*(.*)")  # "- (*X*) (...)"
@@ -127,7 +127,7 @@ class MDQuestion():
         self.answers: list[q.Answer] = answers
 
     @classmethod
-    def create(cls, quest_lang_tag: str) -> Self | None:
+    def new_language(cls, quest_lang_tag: str) -> Self | None:
         m = cls.RE_QUEST_LANG.match(quest_lang_tag)
         if m is not None:
             a, b = m.groups()
