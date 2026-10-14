@@ -1,5 +1,5 @@
+from collections import OrderedDict
 from copy import deepcopy
-from typing import OrderedDict
 
 from .. import question as q
 from ..exam import Exam

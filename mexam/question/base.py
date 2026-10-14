@@ -1,7 +1,7 @@
 """base classes"""
 from abc import ABCMeta, abstractmethod
 from collections import OrderedDict
-from typing import Any, Dict, Optional, Union
+from typing import Any
 from uuid import UUID, uuid4
 
 from .. import misc
@@ -12,14 +12,14 @@ NO_TOPIC = ""
 class TQuestion(metaclass=ABCMeta):
 
     def __init__(self,
-                 title: Optional[str],
-                 topic: Union[int, str, None],
-                 taxonomy: Union[int, str, None],
-                 points: Optional[float],
+                 title: str | None,
+                 topic: int | str | None,
+                 taxonomy: int | str | None,
+                 points: float | None,
                  selected: bool,
-                 uuid: Optional[UUID | str],
-                 collection: Optional[str],
-                 additional_info: Optional[Dict[str, Any]]):
+                 uuid: UUID | str | None,
+                 collection: str | None,
+                 additional_info: dict[str, Any] | None):
 
         if title is None:
             self.title = ""
@@ -61,11 +61,11 @@ class TQuestion(metaclass=ABCMeta):
         return str(self.uuid)[:6]
 
     @property
-    def additional_info(self) -> Dict[str, Any]:
+    def additional_info(self) -> dict[str, Any]:
         return self._additional_info
 
     @additional_info.setter
-    def additional_info(self, val:Dict[str, Any]):
+    def additional_info(self, val:dict[str, Any]):
         bad = [k for k in ("title", "taxonomy", "topic",
                            "points", "selected", "uuid", "collection") if k in val]
         if len(bad)>0:
@@ -83,12 +83,12 @@ class TQuestion(metaclass=ABCMeta):
     def get_info_dict(self, add_title:bool,
                       add_selected:bool,
                       add_uuid:bool,
-                      add_collection:bool) -> Dict[str, Any]:
+                      add_collection:bool) -> dict[str, Any]:
 
         if add_title:
-            d:Dict[str, Any] = {"title": self.title}
+            d:dict[str, Any] = {"title": self.title}
         else:
-            d:Dict[str, Any] = {}
+            d:dict[str, Any] = {}
         d.update({"taxonomy": self.taxonomy,
              "topic": self.topic,
              "points": self.points})
@@ -106,7 +106,6 @@ class TQuestion(metaclass=ABCMeta):
     def short_hash(self):
         return misc.short_hash(self.to_text())
 
-    @property
     def __str__(self):
         return self.to_text()
 
@@ -121,13 +120,13 @@ class TOneLangQuestion(TQuestion):
                  question: str = "",
                  language: str = "",
                  selected: bool = False,
-                 title: Optional[str]  = None,
-                 topic: Union[int, str, None] = None,
-                 taxonomy: Union[int, str, None] = None,
-                 points: Optional[float] = None,
-                 uuid: Optional[UUID | str] = None,
-                 collection: Optional[str] = None,
-                 additional_info: Optional[Dict[str, Any]] = None):
+                 title: str | None  = None,
+                 topic: int | str | None = None,
+                 taxonomy: int | str | None = None,
+                 points: float | None = None,
+                 uuid: UUID | str | None = None,
+                 collection: str | None = None,
+                 additional_info: dict[str, Any] | None = None):
 
         super().__init__(title=title, topic=topic, taxonomy=taxonomy,
                          points=points, selected=selected, uuid=uuid,

@@ -2,28 +2,27 @@
 """
 
 from itertools import groupby
-from typing import List, Optional, Union
 from uuid import UUID
 
 from .question import TQuestion
 
 
-class QuestionDB(object):
+class QuestionDB:
 
     def __init__(self):
-        self._questions: List[TQuestion] = []
+        self._questions: list[TQuestion] = []
         self.ignored_content: str = ""
 
     @property
-    def questions(self) -> List[TQuestion]:
+    def questions(self) -> list[TQuestion]:
         return self._questions
 
-    def add_question(self, question: Optional[TQuestion],
+    def add_question(self, question: TQuestion | None,
                      sort_by_topics: bool = True) -> None:
         if question is None:
             return
         if not isinstance(question, TQuestion):
-            raise RuntimeError("Please add an MCQuestion, OpenQuestion, or"
+            raise TypeError("Please add an MCQuestion, OpenQuestion, or"
                                "their bilingual versions")
         self._questions.append(question)
         if sort_by_topics:
@@ -49,15 +48,15 @@ class QuestionDB(object):
                 cnt +=1
         return cnt
 
-    def get_collections(self) -> List[str]:
+    def get_collections(self) -> list[str]:
         """returns a list of all collections"""
         collections = set()
         for x in self._questions:
             if x.collection:
                 collections.update(x.collection)
-        return sorted(list(collections))
+        return sorted(collections)
 
-    def get_collection_matrix(self) -> List[List[int]]:
+    def get_collection_matrix(self) -> list[list[int]]:
         """returns a matrix of shared items in collections"""
         collections = self.get_collections()
         matrix = [[0] * len(collections) for _ in range(len(collections))]
@@ -73,8 +72,7 @@ class QuestionDB(object):
         """prints a summary of the question database"""
         print(f" questions: {self.n_questions}")
         cnt = 0
-        for key, group in groupby(
-                map(lambda x: x.topic, self._questions)):
+        for key, group in groupby(map(lambda x: x.topic, self._questions)):
             cnt += 1
             n = len(list(group))
             print(f"  topic {cnt}: n = {n}, {key}")
@@ -106,7 +104,7 @@ class QuestionDB(object):
             if tag is not None:
                 x.selected = tag in x.collection
 
-    def select_uuids(self, uuids:List[str]|List[UUID], keep_selected:bool = False):
+    def select_uuids(self, uuids:list[str]|list[UUID], keep_selected:bool = False):
         """selects all items that have the UUID"""
 
         uuid_strs = [str(u) for u in uuids]
@@ -137,7 +135,7 @@ class QuestionDB(object):
             if tag in x.collection:
                 x.collection.remove(tag)
 
-    def get_question(self, uuid:Union[str, UUID]) -> Union[None, TQuestion]:
+    def get_question(self, uuid:str | UUID) -> TQuestion | None:
         if isinstance(uuid, str):
             uuid = UUID(uuid)
         for x in self._questions:

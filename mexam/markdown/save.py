@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import List, Union
 
 from ..misc import FILE_ENCODING, all_files, write_if_different
 from ..question_db import QuestionDB
@@ -8,8 +7,8 @@ from .md_lib import SUFFIX
 
 
 def save_database_folder(db: QuestionDB,
-                         path: Union[str, Path],
-                         remove_empty_files: bool = True) -> List[Path]:
+                         path: str | Path,
+                         remove_empty_files: bool = True) -> list[Path]:
     """returns list with saved files"""
 
     # prepare folder (optionally clear uncollection files)
@@ -27,7 +26,7 @@ def save_database_folder(db: QuestionDB,
     md_dict = database_to_md_dict(db, topic_headings=True,
                                    question_label=False, short_hash=True,
                                    quest_info=True, selected_only=False)
-    saved_files: List[Path] = []
+    saved_files: list[Path] = []
     for topic, txt in md_dict.items():
         topic = topic.lower().replace(" ", "_")
         saved_files.append(path.joinpath(topic).with_suffix(SUFFIX).absolute())
@@ -54,7 +53,8 @@ def save_database_folder(db: QuestionDB,
     return saved_files
 
 
-def save_database_file(db: QuestionDB, path: Union[str, Path]):
+
+def save_database_file(db: QuestionDB, path: str | Path) -> None:
     """save the database in a single file
 
     wrapper of `save_markdown_file` that  ensures that all data are correctly saved
@@ -63,10 +63,10 @@ def save_database_file(db: QuestionDB, path: Union[str, Path]):
                               short_hash=True,  selected_only=False)
 
 def save_markdown_file(db: QuestionDB,
-                       path: Union[str, Path],
+                       path: str | Path,
                        topic_headings: bool = False,
                        short_hash: bool = True,
-                       selected_only: bool = False):
+                       selected_only: bool = False) -> None:
     content = database_to_markdown(db=db,
                        topic_headings=topic_headings,
                        short_hash=short_hash,

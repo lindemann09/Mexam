@@ -5,7 +5,7 @@ see cmd_line_interface for examples
 Oliver Lindemann
 """
 
-__version__ = "0.15"
+__version__ = "0.16-dev0"
 __author__ = 'Oliver Lindemann'
 
 from . import question

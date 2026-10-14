@@ -6,7 +6,6 @@ Python 3
 import random
 from copy import deepcopy
 from pathlib import Path
-from typing import List, Optional, Tuple, Union
 from uuid import UUID
 
 from . import abc_settings
@@ -46,8 +45,8 @@ class Exam(QuestionDB):
     def __init__(self,
                  question_db: QuestionDB,
                  name: str = "No Exam Name",
-                 uuid_file:Union[None, str, Path] = None,
-                 select_collection: Optional[str]=None,
+                 uuid_file:str | Path | None = None,
+                 select_collection: str | None = None,
                  sort_by_topics: bool = True,
                  counter_in_title: bool = True,
                  question_label: bool = True,
@@ -70,7 +69,7 @@ class Exam(QuestionDB):
             selected_uuids, _ = Exam.load_uuid_file(uuid_file)
         else:
             # find uuids
-            selected_uuids:List[UUID] = []
+            selected_uuids:list[UUID] = []
             for q in question_db.questions:
                 if select_collection is None:
                     sel = q.selected
@@ -101,13 +100,11 @@ class Exam(QuestionDB):
 
         rtn = ""
         for cnt, question in enumerate(self._questions):
-            rtn += "# {} --- topic {} --- {} -------------\n".format(cnt+1,
-                                                                     question.topic, question.short_hash)
+            rtn += f"# {cnt+1} --- topic {question.topic} --- {question.short_hash} -------------\n"
             if isinstance(question, TBilingualQuestion):
-                rtn += "L1: {0}\nL2: {1}\n".format(question.L1.question,
-                                                   question.L2.question)
+                rtn += f"L1: {question.L1.question}\nL2: {question.L2.question}\n"
             else:
-                rtn += "{0}\n".format(question.question) # type: ignore
+                rtn += f"{question.question}\n" # type: ignore
         return rtn
 
     def str_title_uuid(self):
@@ -192,10 +189,9 @@ class Exam(QuestionDB):
                     question = question.L1
 
                 if with_hash:
-                    txt += line_suffix_str + "Q{0}, {1}, ".format(x+1,
-                                                                  question.short_hash)
+                    txt += line_suffix_str + f"Q{x+1}, {question.short_hash}, "
                 else:
-                    txt += line_suffix_str + "Q{0}, ".format(x+1)
+                    txt += line_suffix_str + f"Q{x+1}, "
 
                 txt += str(question.correct_answer_ids(
                     as_numbers_starting_with_zero, as_letters=as_letters))[
@@ -210,16 +206,16 @@ class Exam(QuestionDB):
 
         return txt
 
-    def topics(self)  -> List[str]:
+    def topics(self)  -> list[str]:
         return [x.topic for x in self.questions]
 
-    def uuids(self) -> List[str]:
+    def uuids(self) -> list[str]:
         return [str(q.uuid) for q in self._questions]
 
-    def short_uuids(self) -> List[str]:
+    def short_uuids(self) -> list[str]:
         return [str(q.short_uuid) for q in self._questions]
 
-    def titles(self) -> List[str]:
+    def titles(self) -> list[str]:
         rtn = []
         for x in self._questions:
             if self._counter_in_title:
@@ -229,19 +225,19 @@ class Exam(QuestionDB):
             rtn.append(x.title[i:])
         return rtn
 
-    def save_uuid_file(self, file_path:Union[str, Path]):
+    def save_uuid_file(self, file_path:str | Path):
         with open(file_path, "w", encoding=FILE_ENCODING) as fl:
-            for u, tp, t in zip(self.uuids(), self.topics(), self.titles()):
+            for u, tp, t in zip(self.uuids(), self.topics(), self.titles()):  # noqa: FURB122
                 fl.write(f"{u}, {tp}, {t}\n")
 
     @staticmethod
-    def load_uuid_file(uuid_file:Union[str, Path]) -> Tuple[List[UUID], List[str]]:
+    def load_uuid_file(uuid_file:str | Path) -> tuple[list[UUID], list[str]]:
         """loads text with uuids.
         Text file can be a csv file without column names. In this case, uuids
         have to be in the first column
         """
-        uuids:List[UUID] = []
-        title:List[str] = []
+        uuids:list[UUID] = []
+        title:list[str] = []
         with open(uuid_file, "r", encoding=FILE_ENCODING) as fl:
             for x in fl.readlines():
                 a = x.split(",", maxsplit=1)

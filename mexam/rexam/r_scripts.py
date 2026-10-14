@@ -1,5 +1,7 @@
 from os import path
+
 from ..misc import FILE_ENCODING
+
 
 def create_make_exam_r_script(files, name, directory):
     # make_exam file
@@ -45,3 +47,4 @@ mchoice_make <- function(x) {{
 
 exams2qti21(file=files, ititle=titles, mchoice = mchoice_make)
 """
+

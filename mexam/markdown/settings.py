@@ -1,5 +1,5 @@
-from typing import Optional
 from ..abc_settings import ABCSettings
+
 
 class MarkdownSettings(ABCSettings):
 
@@ -8,9 +8,9 @@ md_database: data
 """
 
     @property
-    def md_database(self) -> Optional[str]:
+    def md_database(self) -> str | None:
         return self._optional("md_database", default=None)
 
     @property
-    def db_file(self) -> Optional[str]:
+    def db_file(self) -> str | None:
         return self._optional("db_file", default=None)

@@ -3,6 +3,7 @@ import sys
 from . import __version__
 from .cli import command_line_interface
 
+
 def run():
     if sys.version_info[0] != 3 or sys.version_info[1] < 10:
 

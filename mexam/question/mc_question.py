@@ -1,11 +1,11 @@
 """multiple choice exam"""
 
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 from uuid import UUID
 
 from .. import misc
-from .base import TOneLangQuestion
 from .answer import Answer
+from .base import TOneLangQuestion
 
 
 class MCQuestion(TOneLangQuestion):
@@ -13,13 +13,13 @@ class MCQuestion(TOneLangQuestion):
     def __init__(self, question: str,
                  selected: bool,
                  title: str | None = None,
-                 topic: Union[int, str, None] = None,
-                 taxonomy: Union[int, str, None] = None,
+                 topic: str | int | None = None,
+                 taxonomy: str | int | None = None,
                  language: str = "?",
-                 points: Optional[float] = None,
-                 uuid: Optional[UUID | str] = None,
-                 collection: Optional[str] = None,
-                 additional_info: Optional[Dict[str, Any]] = None):
+                 points: float | None = None,
+                 uuid: UUID | str | None = None,
+                 collection: str | None = None,
+                 additional_info: dict[str, Any] | None = None):
         super().__init__(question=question,
                          selected=selected,
                          topic=topic,
@@ -41,11 +41,11 @@ class MCQuestion(TOneLangQuestion):
         return rtn
 
     @property
-    def answers(self) -> List[Answer]:
+    def answers(self) -> list[Answer]:
         return self._answers
 
     @answers.setter
-    def answers(self, val: List[Answer]) -> None:
+    def answers(self, val: list[Answer]) -> None:
         self._answers = val
 
     def add_answer(self, answer, is_correct, fixed_position):
@@ -60,7 +60,7 @@ class MCQuestion(TOneLangQuestion):
         return misc.shuffle_fixed_positions(self._answers,
                                             self.fixed_position_answers)
 
-    def is_correct(self) -> List[bool]:
+    def is_correct(self) -> list[bool]:
         return [ans.is_correct for ans in self._answers]
 
     def correct_str(self) -> str:
@@ -82,8 +82,8 @@ class MCQuestion(TOneLangQuestion):
         return rtn
 
     def to_old_markdown(self,
-                        question_counter: Optional[int],
-                        question_id: Optional[str]) -> str:
+                        question_counter: int | None,
+                        question_id: str | None) -> str:
         # slightly different format as __str__
         if question_id is not None:
             rtn = f'# {question_id}'

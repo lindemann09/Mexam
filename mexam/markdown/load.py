@@ -1,6 +1,5 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
 
 from .. import question as q
 from ..exam import ExamSettings
@@ -11,8 +10,8 @@ from .save import save_database_folder
 from .settings import MarkdownSettings
 
 
-def load_database(path_or_setings: Union[str, Path, ExamSettings],
-                  suffix: Optional[str] = None,
+def load_database(path_or_setings: str | Path | ExamSettings,
+                  suffix: str | None = None,
                   allow_rewrite: bool = False) -> QuestionDB:
     if suffix is None:
         suffix = SUFFIX
@@ -53,20 +52,20 @@ def load_database(path_or_setings: Union[str, Path, ExamSettings],
     return db
 
 
-class _MDParser(object):
+class _MDParser:
 
     def __init__(self) -> None:
         self._topic = ""
         self._quest_header = None
         # question in different languages
-        self._quest_langs: List[MDQuestion] = []
+        self._quest_langs: list[MDQuestion] = []
         self.uuid_missing_detected = False
         self.hash_issue_detected = False
 
 
-    def _set_quest_header(self, x: Optional[MDQuestionHeader]):
+    def _set_quest_header(self, x: MDQuestionHeader | None):
         self._quest_header = x
-        self._quest_langs: List[MDQuestion] = []
+        self._quest_langs: list[MDQuestion] = []
 
     @property
     def question_in_cache(self) -> bool:
@@ -74,7 +73,7 @@ class _MDParser(object):
         return isinstance(self._quest_header, MDQuestionHeader) and \
             len(self._quest_langs) > 0
 
-    def _make_mexam_question(self) -> Union[None, q.TQuestion]:
+    def _make_mexam_question(self) -> q.TQuestion | None:
 
         if self.question_in_cache:
             langs = []
@@ -99,9 +98,9 @@ class _MDParser(object):
                     return q.BilingualOpenQuestion(langs[0], langs[1], uuid=langs[1].uuid)
 
 
-    def parse(self, lines: Union[str, List[str]]) -> Tuple[QuestionDB, bool, bool]:
+    def parse(self, lines: str | list[str]) -> tuple[QuestionDB, bool, bool]:
         rtn = QuestionDB()
-        ignored: Dict[str, str] = {}
+        ignored: dict[str, str] = {}
         self.uuid_missing_detected = False
         self.hash_issue_detected = False
 
@@ -159,8 +158,7 @@ class _MDParser(object):
 
 
 
-
-def parse(lines: Union[str, List[str]]) -> Tuple[QuestionDB, bool, bool]:
+def parse(lines: str | list[str]) -> tuple[QuestionDB, bool, bool]:
     # return questionBD and ignored content
     parser = _MDParser()
     return parser.parse(lines)

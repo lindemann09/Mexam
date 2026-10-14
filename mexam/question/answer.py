@@ -1,6 +1,7 @@
 from ..misc import strip_lines
 
-class Answer(object):
+
+class Answer:
 
     ENUM_TAG_CORRECT = "- *X* "
     ENUM_TAG_INCOR   = "- "

@@ -1,21 +1,22 @@
 
 from __future__ import annotations
-from abc import ABCMeta
 
+from abc import ABCMeta
 from os.path import splitext
-from typing import Optional
-from .misc import FILE_ENCODING
 
 import toml
 import yaml
+
+from .misc import FILE_ENCODING
+
 
 class ABCSettings(metaclass=ABCMeta):
 
     FILE_ENCODING = FILE_ENCODING
 
     def __init__(self,
-                 filename:Optional[str]=None,
-                 parent:Optional[ABCSettings]=None):
+                 filename:str | None=None,
+                 parent:ABCSettings | None=None):
 
         if filename is None and isinstance(parent, ABCSettings):
             self._name = parent._name

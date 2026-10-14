@@ -3,7 +3,6 @@ from hashlib import md5
 from pathlib import Path
 from random import shuffle
 from time import ctime
-from typing import Any, List, Optional
 
 FILE_ENCODING = "utf-8"
 
@@ -52,7 +51,7 @@ def long_hash(content):
 def short_hash(content):
     return long_hash(content)[:6]
 
-def make_filename(name, suffix:str, addional_suffix:Optional[str]=None)->str:
+def make_filename(name, suffix:str, addional_suffix:str | None=None)->str:
     """returns filename and question filename"""
 
     if addional_suffix is None:
@@ -63,7 +62,7 @@ def make_filename(name, suffix:str, addional_suffix:Optional[str]=None)->str:
     return rtn + suffix
 
 def underline(text, line_type="="):
-    return "{}\n{}".format(text, str(line_type * len(text)))
+    return f"{text}\n{str(line_type * len(text))}"
 
 def bool_str(bool):
     if bool:
@@ -90,7 +89,7 @@ def write_if_different(file_path: Path, content: str):
     with open(file_path, "w", encoding=FILE_ENCODING) as fl:
         fl.write(content)
 
-class MultiCounter(object):
+class MultiCounter:
 
     def __init__(self):
         self.dict = {}
@@ -107,7 +106,7 @@ class MultiCounter(object):
         except KeyError:
             return 0
 
-def all_files(path: Path, suffix: str) -> List[Path]:
+def all_files(path: Path, suffix: str) -> list[Path]:
     return [fl for fl in path.iterdir() if fl.is_file() and fl.suffix == suffix]
 
 def number_to_string(num):
@@ -119,7 +118,7 @@ def number_to_string(num):
         return str(num)
 
 
-class LogFile(object):
+class LogFile:
 
     def __init__(self, filename="mexam.log"):
 
@@ -137,5 +136,5 @@ class LogFile(object):
         for row in txt.split("\n"):
             row = row.rstrip()
             if len(row) > 0:
-                self.file.write("[{}] {}\n".format(ctime()[4:19], row))
+                self.file.write(f"[{ctime()[4:19]}] {row}\n")
                 print(row)

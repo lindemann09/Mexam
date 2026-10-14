@@ -14,11 +14,10 @@ from pathlib import Path
 from . import Exam, __version__, markdown  # , ExamSettings
 from .misc import str_fix_len
 
-#from .tex import LatexFiles, LatexSettings, run_latex
 
 def command_line_interface():
     parser = argparse.ArgumentParser(
-        description="Mexam {}: Make exam".format(__version__),
+        description=f"Mexam {__version__}: Make exam",
         epilog="(c) O. Lindemann")
 
     parser.add_argument("DATABASE", help="path to database folder or file")

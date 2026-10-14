@@ -2,16 +2,14 @@
 
 import re
 from copy import deepcopy
-from typing import List, Optional, Tuple, Union
-
-from typing_extensions import Self
+from typing import Self
 
 from .. import question as q
 from ..misc import number_to_string
 
 SUFFIX = ".md"
 
-class MDTopic(object):
+class MDTopic:
     NO_TOPIC = "Undefined"
     HEAD = re.compile(r"^\s*#\s+(.*)")  # # (...)
 
@@ -30,13 +28,13 @@ class MDTopic(object):
         return f"# {topic}\n\n"
 
     @classmethod
-    def create(cls, txt: str) -> Optional[Self]:
+    def create(cls, txt: str) -> Self | None:
         m = cls.HEAD.match(txt)
         if m is not None:
             return cls(topic=m.groups()[0].strip())
 
 
-class MDQuestionHeader(object):
+class MDQuestionHeader():
 
     SELECT_TAG = "XX"
     HEAD = re.compile(r"^\s*##\s+(.*)")  # (...)
@@ -47,7 +45,7 @@ class MDQuestionHeader(object):
     def __init__(self,
                  title: str,
                  selected: bool,
-                 info: Optional[dict] = None):
+                 info: dict | None = None):
 
         if len(title) == 0:
             MDQuestionHeader.cnt += 1
@@ -84,7 +82,7 @@ class MDQuestionHeader(object):
         return rtn + "\n"
 
     @classmethod
-    def create(cls, txt: str) -> Optional[Self]:
+    def create(cls, txt: str) -> Self | None:
         m = cls.HEAD.match(txt)
         if m is not None:
             txt = m.groups()[0].strip()
@@ -107,7 +105,8 @@ class MDQuestionHeader(object):
         return False
 
 
-class MDQuestion(object):
+
+class MDQuestion():
     # TODO FIXED POSITION NOT IMPLEMENTED
 
     RE_ANSWER = re.compile(r"^\s*-\s+(\*X\*)?\s*(.*)")  # "- (*X*) (...)"
@@ -118,17 +117,17 @@ class MDQuestion(object):
                  language: str,
                  short_hash: str,
                  text: str = "",
-                 answers: Optional[List[q.Answer]] = None):
+                 answers: list[q.Answer] | None = None):
 
         self.text = text
         self.language = language
         self.short_hash = short_hash
         if answers is None:
             answers = []
-        self.answers: List[q.Answer] = answers
+        self.answers: list[q.Answer] = answers
 
     @classmethod
-    def create(cls, quest_lang_tag: str) -> Optional[Self]:
+    def create(cls, quest_lang_tag: str) -> Self | None:
         m = cls.RE_QUEST_LANG.match(quest_lang_tag)
         if m is not None:
             a, b = m.groups()
@@ -152,7 +151,7 @@ class MDQuestion(object):
 
     def to_mexam_question(self,
                       question_header: MDQuestionHeader,
-                      alt_topic="") -> Tuple[Union[q.OpenQuestion,  q.MCQuestion], None | str, bool]:
+                      alt_topic="") -> tuple[q.OpenQuestion | q.MCQuestion, None | str, bool]:
         """returns a Mexam Open or MC Question and a string with the
         inconsistent hash if the hash in the MD file is incorrect
         and a boolean indicating if a new UUID was created (True) or not (False)

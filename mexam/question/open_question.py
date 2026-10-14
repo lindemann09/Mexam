@@ -1,5 +1,5 @@
 
-from typing import Any, Dict, Optional, Union
+from typing import Any
 from uuid import UUID
 
 from .base import TOneLangQuestion
@@ -10,13 +10,13 @@ class OpenQuestion(TOneLangQuestion):  # question with parts
     def __init__(self, question: str,
                  selected:bool,
                  title: str | None = None,
-                 topic: Union[int, str, None] = None,
-                 taxonomy: Union[int, str, None] = None,
+                 topic: int | str | None = None,
+                 taxonomy: int | str | None = None,
                  language: str = "?",
-                 points: Optional[float] = None,
-                 uuid: Optional[UUID | str] = None,
-                 collection: Optional[str] = None,
-                 info: Optional[Dict[str, Any]] = None):
+                 points: float | None = None,
+                 uuid: UUID | str | None = None,
+                 collection: str | None = None,
+                 info: dict[str, Any] | None = None):
         super().__init__(question=question,
                          selected=selected,
                          topic=topic,
@@ -47,7 +47,7 @@ class OpenQuestion(TOneLangQuestion):  # question with parts
     def parts(self):
         return self._parts
 
-    def add_part(self, question: str, points: float = 0, taxonomy: Union[int, str, None] = None):
+    def add_part(self, question: str, points: float = 0, taxonomy: int | str | None = None):
         self._parts.append(question)
         self.part_points.append(int(points))
         self.part_taxonomies.append(taxonomy)

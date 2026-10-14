@@ -1,13 +1,12 @@
 from os import makedirs, path
-from typing import Dict, List
 
 from ..exam import Exam
-from ..question import MCBilingualQuestion, MCQuestion
 from ..misc import FILE_ENCODING, MultiCounter, bool_str, underline
+from ..question import MCBilingualQuestion, MCQuestion
 
 FILE_SUFFIX = ".Rmd"
 
-class _RExamMCItem(object):
+class _RExamMCItem:
 
     def __init__(self, exname:str, mc_question:MCQuestion):
         # escape slashes to ensure correct rendering of latex commands
@@ -80,7 +79,7 @@ def convert(exam:Exam,
             incl_hash:bool=False,
             directory:str="rexam",
             escape_slashes:bool=True,
-            add_subfolder:bool=True) -> Dict[str, List]:
+            add_subfolder:bool=True) -> dict[str, list]:
 
     print("Export to RExams, destination folder: {}".format(directory))
     cnt = MultiCounter()

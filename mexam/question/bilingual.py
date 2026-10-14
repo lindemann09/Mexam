@@ -1,9 +1,8 @@
 from abc import ABCMeta, abstractmethod
-from typing import Optional, Union
 from uuid import UUID
 
 from .. import misc
-from .base import TQuestion, TOneLangQuestion
+from .base import TOneLangQuestion, TQuestion
 from .mc_question import MCQuestion
 from .open_question import OpenQuestion
 
@@ -13,7 +12,7 @@ class TBilingualQuestion(TQuestion, metaclass=ABCMeta):
     def __init__(self,
                  L1_question: TOneLangQuestion,
                  L2_question: TOneLangQuestion,
-                 uuid: Optional[UUID | str]):
+                 uuid: UUID | str | None):
 
         if L1_question.language == L2_question.language:
             raise ValueError(
@@ -52,7 +51,7 @@ class TBilingualQuestion(TQuestion, metaclass=ABCMeta):
 class MCBilingualQuestion(TBilingualQuestion):
 
     def __init__(self, L1_question: MCQuestion, L2_question: MCQuestion,
-                 uuid: Optional[UUID | str] = None):
+                 uuid: UUID | str | None = None):
         assert isinstance(L1_question, MCQuestion)
         assert isinstance(L2_question, MCQuestion)
         super().__init__(L1_question, L2_question, uuid=uuid)
@@ -83,7 +82,7 @@ class MCBilingualQuestion(TBilingualQuestion):
 class BilingualOpenQuestion(TBilingualQuestion):
 
     def __init__(self, L1_question: OpenQuestion, L2_question: OpenQuestion,
-                 uuid: Optional[UUID | str] = None):
+                 uuid: UUID | str | None = None):
         assert isinstance(L1_question, OpenQuestion)
         assert isinstance(L2_question, OpenQuestion)
         super().__init__(L1_question, L2_question, uuid=uuid)
@@ -98,6 +97,7 @@ class BilingualOpenQuestion(TBilingualQuestion):
     def L2(self) -> OpenQuestion:
         return self._l2
 
-    def add_part(self, L1_part: str, L2_part: str, points: float = 0, taxonomy: Union[int, str, None] = None):
+    def add_part(self, L1_part: str, L2_part: str, points: float = 0,
+                 taxonomy: int | str | None = None):
         self.L1.add_part(L1_part, points=points, taxonomy=taxonomy)
         self.L2.add_part(L2_part, points=points, taxonomy=taxonomy)
