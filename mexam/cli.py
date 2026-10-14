@@ -159,34 +159,34 @@ def command_line_interface():
                     found = db.add_selection_uuid(args.ID)
                 except RuntimeError as er:
                     print(f"ERROR: {er}")
-                    exit()
+                    sys.exit()
                 if found:
                     rewrite = True
                 else:
                     print(f"Can't find UUID '{args.ID}'")
-                    exit()
+                    sys.exit()
             else:
-                exit()
+                sys.exit()
 
         if args.NEW_TAG:
             if ask_yes_no(f"Save current selection as collection '{args.NEW_TAG}'"):
                 db.store_collection(tag=args.NEW_TAG)
                 rewrite = True
             else:
-                exit()
+                sys.exit()
         elif args.REMOVE_TAG:
             if ask_yes_no(f"Remove collection '{args.REMOVE_TAG}' from all items"):
                 db.remove_collection(tag=args.REMOVE_TAG)
                 rewrite = True
             else:
-                exit()
+                sys.exit()
 
         if args.unselect_all:
             if ask_yes_no("Unselect all selected questions"):
                 db.unselect_all()
                 rewrite = True
             else:
-                exit()
+                sys.exit()
 
         print(f"- selected: {db.n_selected}")
         if rewrite:

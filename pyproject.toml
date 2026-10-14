@@ -13,3 +13,4 @@ dependencies =  ["PyYAML>=5.2",  "toml>=0.10", "typing_extensions>=4.12"]
 
 [project.scripts]
 mexam = "mexam.__main__:run"
+
