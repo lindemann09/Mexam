@@ -6,7 +6,7 @@ It allows you to create, edit, and organize exam questions in multiple languages
 Oliver Lindemann
 """
 
-__version__ = "0.16-dev1"
+__version__ = "0.16"
 __author__ = 'Oliver Lindemann'
 
 from . import question
