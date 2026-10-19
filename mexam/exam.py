@@ -48,7 +48,7 @@ class Exam(QuestionDB):
                  uuid_file:str | Path | None = None,
                  select_collection: str | None = None,
                  sort_by_topics: bool = True,
-                 counter_in_title: bool = True,
+                 counter_in_title: bool = False,
                  question_label: bool = True,
                  quest_info: bool = False):
         """adds all selected questions

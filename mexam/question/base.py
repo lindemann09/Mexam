@@ -127,12 +127,10 @@ class TOneLangQuestion(TQuestion):
                  uuid: UUID | str | None = None,
                  collection: str | None = None,
                  additional_info: dict[str, Any] | None = None):
-
         super().__init__(title=title, topic=topic, taxonomy=taxonomy,
                          points=points, selected=selected, uuid=uuid,
                          collection=collection,
                          additional_info=additional_info)
-
         self.question = misc.strip_lines(question)
         self.language = language
 
